@@ -1,0 +1,19 @@
+Leitura da entrada
+Criação do vetor compartilhado Estrada
+Definir Estrutura Ciclista
+- 3 Velocidades
+- Identificador??
+- Pontuação Acumulada
+- Posição Atual
+Variável compartilhada de tempo (minutos)
+3 Listas para cada Checkpoint
+3 Listas para cada final de etapa
+Imprimir Saída
+LEIAME
+
+Relatório de execução
+
+
+Dúvidas
+- Uma montanha pode ser diferente de um trecho de subida seguido imediatamente de um trecho de descida? O que é considerado o topo??
+
