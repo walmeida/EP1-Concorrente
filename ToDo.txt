@@ -2,12 +2,15 @@ Leitura da entrada
 Criação do vetor compartilhado Estrada
 Definir Estrutura Ciclista
 - 3 Velocidades
-- Identificador??
-- Pontuação Acumulada
+- Identificador (um da thread e um do ciclista)
+- Pontuação Acumulada (para cada um dos 2 tipos de etapa)
 - Posição Atual
+- Tempo atual da simulação do ciclista
 Variável compartilhada de tempo (minutos)
-3 Listas para cada Checkpoint
+Variável compartilhada com número de threads ciclistas que terminaram a simulação daquele minuto
+1 Lista para cada Checkpoint (precisa só dos 6 primeiros?)
 3 Listas para cada final de etapa
+Lista das threads que terminaram sua execução (terminaram a corrida)
 Imprimir Saída
 LEIAME
 
@@ -17,3 +20,26 @@ Relatório de execução
 Dúvidas
 - Uma montanha pode ser diferente de um trecho de subida seguido imediatamente de um trecho de descida? O que é considerado o topo??
 
+
+
+Implementação
+
+Ler entrada
+
+Variáveis globais:
+- Distância d da estrada.
+- Matriz estrada d X n, com os identificadores dos ciclistas.
+- Vetor de intervalos de terrenos: tipo de terreno, posição final.
+- Vetor de checkpoints: posição do checkpoint, lista de primeiros colocados.
+- 3 Listas, uma para cada camisa.
+- Tempo sendo simulado.
+- Número de ciclistas que terminaram simulação daquele minuto.
+- Lista de threads que terminaram sua execução.
+
+Funções:
+- Leitura da entrada (e criação de algumas das variáveis globais).
+- Criação de ciclista (estrutura de dados).
+- Criação das threads de simulação
+- Simulação de um ciclista
+- Destruição das threads dos ciclistas
+- Impressão das colocações finais nas 3 etapas.
