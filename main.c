@@ -1,23 +1,26 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <pthread.h>
 
 int *estrada;			// Vetor Compartilhado da Estrada
-int d; 					// Distância em Km
+int d; 					  // Distância em Km
 
-typedef struct biker{
-	int id;				// Identificador
-	int vel_plano; 		// Velocidade do Ciclista em trechos Planos em Km/h
-	int vel_sub; 		// Velocidade do Ciclista em trechos de Subida em Km/h
-	int vel_desc; 		// Velocidade do Ciclista em trechos de Descida em Km/h
-}ciclista;
+typedef struct biker {
+	int id;				      // Identificador do Ciclista
+	pthread_t tid;      // Identificador da thread
+	int vel_plano; 		  // Velocidade do Ciclista em trechos Planos em Km/h
+	int vel_sub; 		    // Velocidade do Ciclista em trechos de Subida em Km/h
+	int vel_desc; 		  // Velocidade do Ciclista em trechos de Descida em Km/h
+	int pontos_plano;   // Pontuação do Ciclista para trechos Planos
+	int pontos_montanha;// Pontuação do Ciclista para trechos de Montanha
+} ciclista;
 
 void leitura_entrada(char *nome_arquivo, int *m, int *n, char *modo_vel){
-  FILE *arq_entrada;	// Arquivo de Entrada
+  FILE *arq_entrada;
   int k;
 	int aux = 0;
 	char trecho;
 	
-	// Leitura do arquivo de entrada
 	arq_entrada = fopen(nome_arquivo,"r");
 	fscanf(arq_entrada,"%d", m);
 	fscanf(arq_entrada,"%d", n);
@@ -31,8 +34,6 @@ void leitura_entrada(char *nome_arquivo, int *m, int *n, char *modo_vel){
 		}
 	}
 	fscanf(arq_entrada,"%d", &d);
-	
-	printf("Oi estou vivo %d %d %c %d\n",*m,*n,*modo_vel,d);
 	
 	while(aux < d){
 	  trecho = 'E';
@@ -56,12 +57,28 @@ void leitura_entrada(char *nome_arquivo, int *m, int *n, char *modo_vel){
 		printf("trecho: %c - k: %d\n",trecho,k);
 		aux += k;
 	}
-	// Fim da Leitura
+}
+
+void inicializa_vel(ciclista * c) {
+  c->vel_plano = 50;
+  c->vel_sub = 50;
+  c->vel_desc = 50;
+}
+
+void cria_ciclistas (int m) {
+  int i;
+  ciclista * cicl;
+  for (i = 0; i < m; ++i) {
+    cicl = (ciclista *) malloc (sizeof (*cicl));
+    cicl->id = i;
+    cicl->pontos_plano = cicl->pontos_montanha = 0;
+    inicializa_vel(cicl);
+  }
 }
 
 int main(int argc, char* argv[]){
-	int m; 				// Número de ciclistas
-	int n; 				// Largura da Pista
+	int m; 				    // Número de ciclistas
+	int n; 				    // Largura da Pista
 	char modo_vel;		// Modo de Criação da Velocidade:  'A' - Aleatório / 'U' - Uniforme 
 	
 	leitura_entrada(argv[1],&m,&n,&modo_vel);

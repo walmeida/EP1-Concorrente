@@ -37,7 +37,7 @@ Variáveis globais:
 - Lista de threads que terminaram sua execução.
 
 Funções:
-- Leitura da entrada (e criação de algumas das variáveis globais).
+- Leitura da entrada (e criação de algumas das variáveis globais). OK!
 - Criação de ciclista (estrutura de dados).
 - Criação das threads de simulação
 - Simulação de um ciclista
