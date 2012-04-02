@@ -20,12 +20,13 @@ void queue_put(queue *myroot, Item *mynode) {
 }
 
 // get from head
-node *queue_get(queue *myroot) {
+Item *queue_get(queue *myroot) {
     node *mynode;
     mynode=myroot->head;
     if (myroot->head != NULL)
         myroot->head = myroot->head->next;
     if (myroot->head == NULL)
         myroot->tail = NULL;
-    return mynode;
+    // TODO: free do mynode
+    return mynode->data;
 }
