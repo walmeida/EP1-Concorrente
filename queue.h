@@ -2,8 +2,6 @@
 #define QUEUE_H_
 
 #include "ciclista.h"
-// TODO: criar arquivo ciclista.h com
-// struct do ciclista
 typedef ciclista Item;
 
 typedef struct node {

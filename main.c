@@ -2,13 +2,27 @@
 #include <stdlib.h>
 #include <pthread.h>
 
+#include "queue.h"
+#include "ciclista.h"
+#include "terreno.h"
+
 int *estrada;           // Vetor Compartilhado da Estrada
 int d;                  // Distância em Km
+
+Terreno *terreno;       // Vetor do comprimento da estrada que indica o "tipo do solo"
 
 struct cleanup_queue {
   data_control control; // TODO: trocar por coisas de pthread (mutex)
   queue cleanup;
 } cq;
+
+void monta_terreno(int ini, int fim, int checkpoint, Terreno trecho){
+  int i;
+  for(i = ini; i < fim; i++){
+    terreno[i] = trecho;
+  }
+  if(checkpoint != -1) terreno[checkpoint] = trecho + CP;
+}
 
 void leitura_entrada(char *nome_arquivo, int *m, int *n, char *modo_vel) {
   FILE *arq_entrada;
@@ -38,20 +52,27 @@ void leitura_entrada(char *nome_arquivo, int *m, int *n, char *modo_vel) {
                 exit(-1);
             }
         }
+        
+        fscanf(arq_entrada,"%d", &k);
+        printf("trecho: %c - k: %d\n",trecho,k);
+        
         switch(trecho){
             case 'P': // Trecho Plano
+                monta_terreno(aux, aux + k, (aux + aux + k)/2, PLANO);
                 break;
             case 'S': // Trecho Subida
+                monta_terreno(aux, aux + k, aux + k, SUBIDA);
                 break;
             case 'D': // Trecho Descida
+                monta_terreno(aux, aux + k, -1, DESCIDA);
                 break;
             default:
                 break;
         }
-        fscanf(arq_entrada,"%d", &k);
-        printf("trecho: %c - k: %d\n",trecho,k);
         aux += k;
     }
+    //Checkpoint final
+    terreno[d-1] = terreno[d-1] + CP;
 }
 
 
