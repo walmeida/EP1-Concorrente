@@ -2,32 +2,49 @@
 #include "queue.h"
 #include <stdlib.h>
 
-void queue_init(queue *myroot) {
-    myroot->head = NULL;
-    myroot->tail = NULL;
+void queue_init(queue *root) {
+    root->head = NULL;
+    root->tail = NULL;
+    root->size = 0;
 }
 
-void queue_put(queue *myroot, Item *data) {
-    node *mynode = (node *) malloc(sizeof(*mynode));
+// put on tail
+void queue_put(queue *root, Item *data) {
+    node *mynode;
+    if (!root)
+        return;
+    mynode = (node *) malloc(sizeof(*mynode));
     if (!mynode) {
-        //TODO
+        fprintf(stderr, "Erro fazendo malloc.\n");
+        return;
     }
     mynode->next = NULL;
-    if (myroot->tail != NULL)
-        myroot->tail->next = mynode;
-    myroot->tail = mynode;
-    if (myroot->head == NULL)
-        myroot->head = mynode;
+    if (root->tail != NULL)
+        root->tail->next = mynode;
+    root->tail = mynode;
+    if (root->head == NULL)
+        root->head = mynode;
+    root->size++;
 }
 
 // get from head
-Item *queue_get(queue *myroot) {
+Item *queue_get(queue *root) {
+    if (!root)
+        return NULL;
     node *mynode;
-    mynode=myroot->head;
-    if (myroot->head != NULL)
-        myroot->head = myroot->head->next;
-    if (myroot->head == NULL)
-        myroot->tail = NULL;
-    // TODO: free do mynode
-    return mynode->data;
+    mynode = root->head;
+    if (root->head != NULL)
+        root->head = root->head->next;
+    if (root->head == NULL)
+        root->tail = NULL;
+    Item *d = mynode->data;
+    free(mynode);
+    root->size--;
+    return d;
+}
+
+int queue_size(queue *root) {
+    if (root)
+        return root->size;
+    return -1;
 }
