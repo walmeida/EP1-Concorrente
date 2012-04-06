@@ -1,17 +1,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <time.h>
 
 #include "queue.h"
 #include "ciclista.h"
 #include "terreno.h"
 #include "threads.h"
 
+
 int *estrada;           // Vetor Compartilhado da Estrada
 int d;                  // Distância em Km
 
 Terreno *terreno;       // Vetor do comprimento da estrada que indica o "tipo do solo"
 
+queue * checkpoints;    // Vetor de filas. Cada elemento da fila é um ciclista que passou pelo CP.
+int numtrechos;         // Serve para indicar o tamanho do vetor de checkpoints
 int tempo;              // Variável compartilhada do minuto sendo simulado;
 cleanup_queue cq;
 
@@ -74,6 +78,7 @@ void leitura_entrada(char *nome_arquivo, int *m, int *n, char *modo_vel) {
                 break;
         }
         aux += k;
+        numtrechos++;
     }
     //Checkpoint final
     terreno[d-1] = terreno[d-1] + CP;
@@ -131,6 +136,11 @@ int main(int argc, char* argv[]){
     int n;              // Largura da Pista
     char modo_vel;      // Modo de Criação da Velocidade:  'A' - Aleatório / 'U' - Uniforme 
     int numthreads = 0;
+    int i;
+    unsigned int iseed = (unsigned int)time(NULL);
+    srand (iseed);
+    
+    numtrechos = 0;
     
     if (argc <= 1) {
         fprintf(stderr, "Forneca o nome do arquivo de entrada como parametro.\n");
@@ -138,6 +148,13 @@ int main(int argc, char* argv[]){
     }
     cleanup_queue_init ();
     leitura_entrada(argv[1],&m,&n,&modo_vel);
+    // Criando o vetor de CP
+      checkpoints = malloc(numtrechos*sizeof(*checkpoints));
+      for(i = 0; i < numtrechos; i++){
+        queue_init(&checkpoints[i]);
+      }
+    //
+    
     if (cria_ciclistas(m, modo_vel, &numthreads)) {
         // Erro ao criar alguma thread
         fprintf(stderr, "Error starting threads!\n");
