@@ -10,9 +10,9 @@ void *thread_ciclista(void *arg) {
 }    
 
 void inicializa_vel(ciclista *c, char modo_vel) {
-  c->vel_plano = 50;
-  c->vel_sub = 50;
-  c->vel_desc = 50;
+    c->vel_plano = 50;
+    c->vel_sub = 50;
+    c->vel_desc = 50;
 }
 
 int cria_ciclistas(int m, char modo_vel, int * numthreads) {

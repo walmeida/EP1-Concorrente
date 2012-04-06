@@ -38,7 +38,7 @@ Variáveis globais:
 
 Funções:
 - Leitura da entrada (e criação de algumas das variáveis globais). OK!
-- Criação de ciclista (estrutura de dados).
+- Criação de ciclista (estrutura de dados). OK!
 - Criação das threads de simulação
 - Simulação de um ciclista
 - Destruição das threads dos ciclistas

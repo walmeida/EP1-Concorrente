@@ -7,13 +7,13 @@ typedef ciclista Item;
 // FIFO queue
 
 typedef struct node {
-  struct node *next;
-  Item *data;
+    struct node *next;
+    Item *data;
 } node;
 
 typedef struct queue {
-  node *head, *tail; 
-  int size;
+    node *head, *tail; 
+    int size;
 } queue;
 
 void queue_init(queue *root);
