@@ -15,6 +15,7 @@ Terreno *terreno;       // Vetor do comprimento da estrada que indica o "tipo do
 
 queue * checkpoints;    // Vetor de filas. Cada elemento da fila é um ciclista que passou pelo CP.
 int numtrechos;         // Serve para indicar o tamanho do vetor de checkpoints
+int tempo;              // Variável compartilhada do minuto sendo simulado;
 
 struct cleanup_queue {
   pthread_mutex_t mutex;
@@ -115,6 +116,24 @@ void join_threads(int numthreads) {
   }
 }
 
+int cleanup_queue_init() {
+  if (pthread_mutex_init(&(cq.mutex),NULL))
+    return 1;
+  if (pthread_cond_init(&(cq.cond),NULL))
+    return 1;
+  //mycontrol->active=0;
+  return 0;
+}
+
+int cleanup_queue_destroy() {
+  if (pthread_cond_destroy(&(cq.cond)))
+    return 1;
+  if (pthread_cond_destroy(&(cq.cond)))
+    return 1;
+  //mycontrol->active=0;
+  return 0;
+}
+
 int main(int argc, char* argv[]){
     int m;              // Número de ciclistas
     int n;              // Largura da Pista
@@ -130,6 +149,7 @@ int main(int argc, char* argv[]){
         fprintf(stderr, "Forneca o nome do arquivo de entrada como parametro.\n");
         return 1;
     }
+    cleanup_queue_init ();
     leitura_entrada(argv[1],&m,&n,&modo_vel);
     // Criando o vetor de CP
       checkpoints = malloc(numtrechos*sizeof(*checkpoints));
@@ -142,9 +162,13 @@ int main(int argc, char* argv[]){
         // Erro ao criar alguma thread
         fprintf(stderr, "Error starting threads!\n");
         join_threads(numthreads);
+        cleanup_queue_destroy ();
+        return 2;
     }
-    // TODO: simulacao
+    printf ("numthreads: %d\n", numthreads);
     join_threads(numthreads);
+    //TODO: imprimir relatorio;
+    cleanup_queue_destroy ();
         
     return 0;
 }

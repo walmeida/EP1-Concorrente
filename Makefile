@@ -4,7 +4,7 @@ BDIR = bin
 
 CC = gcc
 CFLAGS = -Wall -I$(IDIR) -g
-LIBS = #Ex.: -lm
+LIBS = -lpthread
 
 EXE = tourdefrance
 
