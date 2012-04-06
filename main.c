@@ -18,6 +18,8 @@ queue * checkpoints;    // Vetor de filas. Cada elemento da fila é um ciclista 
 int numtrechos;         // Serve para indicar o tamanho do vetor de checkpoints
 int tempo;              // Variável compartilhada do minuto sendo simulado;
 cleanup_queue cq;
+extern int workers_active; // Variavel compartilhada que diz se os ciclistas devem ou nao realizar a
+                           // simulacao.
 
 void monta_terreno(int ini, int fim, int checkpoint, Terreno trecho){
   int i;
@@ -39,12 +41,12 @@ void leitura_entrada(char *nome_arquivo, int *m, int *n, char *modo_vel) {
     *modo_vel = 'B';
     while (*modo_vel != 'A' && *modo_vel != 'U') {
         fscanf(arq_entrada,"%c", modo_vel);
-        printf ("Modo vel: %c\n", *modo_vel);
         if (feof (arq_entrada)) {
             printf ("Oh oh!\n");
             exit (-2);
         }
     }
+    printf ("Modo vel: %c\n", *modo_vel);
     fscanf(arq_entrada,"%d", &d);
     terreno = (Terreno *) malloc(d*sizeof(*terreno));
     if (!terreno) {
@@ -113,21 +115,20 @@ void join_threads(int numthreads) {
 }
 
 int cleanup_queue_init() {
-  if (pthread_mutex_init(&(cq.mutex),NULL))
-    return 1;
-  if (pthread_cond_init(&(cq.cond),NULL))
-    return 1;
-  //mycontrol->active=0;
-  return 0;
+    if (pthread_mutex_init(&(cq.mutex),NULL))
+        return 1;
+    if (pthread_cond_init(&(cq.cond),NULL))
+        return 1;
+    queue_init(&(cq.cleanup));
+    return 0;
 }
 
 int cleanup_queue_destroy() {
-  if (pthread_cond_destroy(&(cq.cond)))
-    return 1;
-  if (pthread_cond_destroy(&(cq.cond)))
-    return 1;
-  //mycontrol->active=0;
-  return 0;
+    if (pthread_cond_destroy(&(cq.cond)))
+        return 1;
+    if (pthread_cond_destroy(&(cq.cond)))
+        return 1;
+    return 0;
 }
 
 int main(int argc, char* argv[]){
@@ -136,7 +137,7 @@ int main(int argc, char* argv[]){
     char modo_vel;      // Modo de Criação da Velocidade:  'A' - Aleatório / 'U' - Uniforme 
     int numthreads = 0;
     int i;
-    unsigned int iseed = (unsigned int)time(NULL);
+    unsigned int iseed = (unsigned int) time(NULL);
     srand (iseed);
     
     numtrechos = 0;
@@ -146,13 +147,12 @@ int main(int argc, char* argv[]){
         return 1;
     }
     cleanup_queue_init ();
-    leitura_entrada(argv[1],&m,&n,&modo_vel);
+    leitura_entrada(argv[1], &m, &n, &modo_vel);
     // Criando o vetor de CP
-      checkpoints = malloc(numtrechos*sizeof(*checkpoints));
-      for(i = 0; i < numtrechos; i++){
+    checkpoints = malloc(numtrechos*sizeof(*checkpoints));
+    for(i = 0; i < numtrechos; i++) {
         queue_init(&checkpoints[i]);
-      }
-    //
+    }
     
     if (cria_ciclistas(m, modo_vel, &numthreads)) {
         // Erro ao criar alguma thread

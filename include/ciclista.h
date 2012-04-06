@@ -13,6 +13,7 @@ typedef struct biker {
     int vel_desc;       // Velocidade do Ciclista em trechos de Descida em Km/h
     int pontos_plano;   // Pontuação do Ciclista para trechos Planos
     int pontos_montanha;// Pontuação do Ciclista para trechos de Montanha
+    double posicao_estrada; // Km da estrada em que está.
 } ciclista;
 
 void *thread_ciclista(void *arg);
