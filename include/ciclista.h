@@ -3,6 +3,8 @@
 
 #include <pthread.h>
 
+extern int tempo;
+
 typedef struct biker {
     int id;             // Identificador do Ciclista
     pthread_t tid;      // Identificador da thread
