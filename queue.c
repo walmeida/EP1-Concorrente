@@ -1,12 +1,13 @@
 #include <stdio.h>
 #include "queue.h"
+#include <stdlib.h>
 
 void queue_init(queue *myroot) {
     myroot->head = NULL;
     myroot->tail = NULL;
 }
 
-void queue_put(queue *myroot, Item *mynode) {
+void queue_put(queue *myroot, Item *data) {
     node *mynode = (node *) malloc(sizeof(*mynode));
     if (!mynode) {
         //TODO

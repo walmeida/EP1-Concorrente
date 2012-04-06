@@ -12,7 +12,7 @@ int d;                  // Distância em Km
 Terreno *terreno;       // Vetor do comprimento da estrada que indica o "tipo do solo"
 
 struct cleanup_queue {
-  data_control control; // TODO: trocar por coisas de pthread (mutex)
+  //data_control control; // TODO: trocar por coisas de pthread (mutex)
   queue cleanup;
 } cq;
 
@@ -45,7 +45,7 @@ void leitura_entrada(char *nome_arquivo, int *m, int *n, char *modo_vel) {
     fscanf(arq_entrada,"%d", &d);
     
     while(aux < d){
-      trecho = 'E';
+        trecho = 'E';
         while (trecho != 'P' && trecho != 'S' && trecho != 'D') {
             if (!fscanf(arq_entrada,"%c", &trecho)) {
                 printf("Não foi possível ler o bang!\n");
