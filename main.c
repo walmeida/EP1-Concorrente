@@ -68,13 +68,13 @@ void leitura_entrada(char *nome_arquivo, int *m, int *n, char *modo_vel) {
         
         switch(trecho){
             case 'P': // Trecho Plano
-                monta_terreno(aux, aux + k, (aux + aux + k)/2, PLANO);
+                monta_terreno(aux, aux + k, aux + k/2, PLANO);
                 break;
             case 'S': // Trecho Subida
-                monta_terreno(aux, aux + k, aux + k, SUBIDA);
+                monta_terreno(aux, aux + k, -1, SUBIDA);
                 break;
             case 'D': // Trecho Descida
-                monta_terreno(aux, aux + k, -1, DESCIDA);
+                monta_terreno(aux, aux + k, aux, DESCIDA);
                 break;
             default:
                 break;
