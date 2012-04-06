@@ -5,6 +5,7 @@
 #include "queue.h"
 #include "ciclista.h"
 #include "terreno.h"
+#include "threads.h"
 
 int *estrada;           // Vetor Compartilhado da Estrada
 int d;                  // Distância em Km
@@ -12,12 +13,7 @@ int d;                  // Distância em Km
 Terreno *terreno;       // Vetor do comprimento da estrada que indica o "tipo do solo"
 
 int tempo;              // Variável compartilhada do minuto sendo simulado;
-
-struct cleanup_queue {
-  pthread_mutex_t mutex;
-  pthread_cond_t cond;
-  queue cleanup;
-} cq;
+cleanup_queue cq;
 
 void monta_terreno(int ini, int fim, int checkpoint, Terreno trecho){
   int i;
@@ -87,22 +83,23 @@ void join_threads(int numthreads) {
   ciclista *curnode;
   printf("joining threads...\n");
   while (numthreads) {
-    pthread_mutex_lock(&cq.mutex);
-    /* below, we sleep until there really is a new cleanup node.  This
-       takes care of any false wakeups... even if we break out of
-       pthread_cond_wait(), we don't make any assumptions that the
-       condition we were waiting for is true.  */
-    while (cq.cleanup.head==NULL) {
-      pthread_cond_wait(&cq.cond, &cq.mutex);
-    }
-    /* at this point, we hold the mutex and there is an item in the
-       list that we need to process.  First, we remove the node from
-       the queue.  Then, we call pthread_join() on the tid stored in
-       the node.  When pthread_join() returns, we have cleaned up
-       after a thread.  Only then do we free() the node, decrement the
-       number of additional threads we need to wait for and repeat the
-       entire process, if necessary */
+      pthread_mutex_lock(&cq.mutex);
+      /* below, we sleep until there really is a new cleanup node.  This
+         takes care of any false wakeups... even if we break out of
+         pthread_cond_wait(), we don't make any assumptions that the
+         condition we were waiting for is true.  */
+      while (cq.cleanup.head==NULL) {
+          pthread_cond_wait(&cq.cond, &cq.mutex);
+      }
+      /* at this point, we hold the mutex and there is an item in the
+         list that we need to process.  First, we remove the node from
+         the queue.  Then, we call pthread_join() on the tid stored in
+         the node.  When pthread_join() returns, we have cleaned up
+         after a thread.  Only then do we free() the node, decrement the
+         number of additional threads we need to wait for and repeat the
+         entire process, if necessary */
       curnode = (ciclista *) queue_get(&cq.cleanup);
+      printf("joining with thread %d\n", curnode->id);
       pthread_mutex_unlock(&cq.mutex);
       pthread_join(curnode->tid, NULL);
       printf("joined with thread %d\n", curnode->id);
