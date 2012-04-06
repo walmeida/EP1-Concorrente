@@ -10,9 +10,14 @@ void *thread_ciclista(void *arg) {
 }    
 
 void inicializa_vel(ciclista *c, char modo_vel) {
-  c->vel_plano = 50;
-  c->vel_sub = 50;
-  c->vel_desc = 50;
+  if(modo_vel == 'A'){
+    c->vel_plano = sorteia_velocidade();
+    c->vel_sub = sorteia_velocidade();
+    c->vel_desc = sorteia_velocidade();  
+  }
+  else{
+    c->vel_plano = c->vel_sub = c->vel_desc = 50;
+  }
 }
 
 int cria_ciclistas(int m, char modo_vel, int * numthreads) {
@@ -29,4 +34,13 @@ int cria_ciclistas(int m, char modo_vel, int * numthreads) {
         numthreads++;
     }
     return 0;
+}
+
+int sorteia_velocidade(){
+   int velocidade;
+      
+   velocidade = 20 + (int)( 60.0 * rand() / ( RAND_MAX + 1.0 ) );
+   
+   return velocidade;
+    
 }
