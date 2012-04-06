@@ -39,7 +39,7 @@ void leitura_entrada(char *nome_arquivo, int *m, int *n, char *modo_vel) {
     *modo_vel = 'B';
     while (*modo_vel != 'A' && *modo_vel != 'U') {
         fscanf(arq_entrada,"%c", modo_vel);
-        printf ("%c", *modo_vel);
+        printf ("Modo vel: %c\n", *modo_vel);
         if (feof (arq_entrada)) {
             printf ("Oh oh!\n");
             exit (-2);
@@ -104,7 +104,6 @@ void join_threads(int numthreads) {
          number of additional threads we need to wait for and repeat the
          entire process, if necessary */
       curnode = (ciclista *) queue_get(&cq.cleanup);
-      printf("joining with thread %d\n", curnode->id);
       pthread_mutex_unlock(&cq.mutex);
       pthread_join(curnode->tid, NULL);
       printf("joined with thread %d\n", curnode->id);

@@ -19,6 +19,7 @@ void queue_put(queue *root, Item *data) {
         return;
     }
     mynode->next = NULL;
+    mynode->data = data;
     if (root->tail != NULL)
         root->tail->next = mynode;
     root->tail = mynode;
