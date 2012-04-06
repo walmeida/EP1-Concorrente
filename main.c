@@ -134,7 +134,7 @@ int main(int argc, char* argv[]){
     // Criando o vetor de CP
       checkpoints = malloc(numtrechos*sizeof(*checkpoints));
       for(i = 0; i < numtrechos; i++){
-        queue_init(checkpoints[i]);
+        queue_init(&checkpoints[i]);
       }
     //
     
