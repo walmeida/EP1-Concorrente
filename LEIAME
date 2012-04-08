@@ -1,0 +1,36 @@
+/* ******************************************************* */
+/* Aluno: Jefferson Serafim Ascaneo   NUSP  	             */
+/* Aluno: Wallace Faveron de Almeida  NUSP 6879609 	       */
+/* MAC0438 - 2011 - IME-USP				                         */
+/* Prof. Daniel Macedo Bastista		                         */
+/* EP1 - Tour de France					                           */
+/* Programa testado e compilado no Ubuntu 10.10		         */
+/* ******************************************************* */
+
+O Exercício Programa realiza a simulação de uma etapa de uma
+das mais famosas competições de ciclismo, a "Tour de France".
+A implementação foi feita em linguagem C. Dentre os objetivos 
+principais do exercício, está o trabalho com múltiplas threads. 
+Para isso foi utilizada a biblioteca POSIX threads.
+
+A propriedade de exclusão mútua é garantida pela utilização
+de mutex, também disponibilizada pela biblioteca.
+
+
+
+Juntamente ao programa, foi elaborado um Makefile. 
+Para compilar o código-fonte, basta digitar em um terminal:
+
+make
+
+Para executar, basta digitar o comando:
+
+./tourdefrance <nomedoarquivo> 
+
+onde "nomedoarquivo" é o nome correspondente ao arquivo de entrada.
+
+Os resultados obtidos pelos arquivos de entrada propostos no enunciado
+encontram-se em "relatorio.pdf".
+
+O formato da saída do programa será:  //TEMOS QUE DECIDIR AINDA, NÃO É???
+
