@@ -1,10 +1,10 @@
 /* ******************************************************* */
-/* Aluno: Jefferson Serafim Ascaneo   NUSP  	             */
+/* Aluno: Jefferson Serafim Ascaneo   NUSP 6431284         */
 /* Aluno: Wallace Faveron de Almeida  NUSP 6879609 	       */
-/* MAC0438 - 2011 - IME-USP				                         */
-/* Prof. Daniel Macedo Bastista		                         */
-/* EP1 - Tour de France					                           */
-/* Programa testado e compilado no Ubuntu 10.10		         */
+/* MAC0438 - 2011 - IME-USP	                               */
+/* Prof. Daniel Macedo Bastista                            */
+/* EP1 - Tour de France	                                   */
+/* Programa testado e compilado no Ubuntu 10.10	           */
 /* ******************************************************* */
 
 O Exercício Programa realiza a simulação de uma etapa de uma
@@ -23,7 +23,7 @@ Para compilar o código-fonte, basta digitar em um terminal:
 
 make
 
-Para executar, basta digitar o comando:
+Para executar, basta digitar o seguinte comando na pasta bin:
 
 ./tourdefrance <nomedoarquivo> 
 
