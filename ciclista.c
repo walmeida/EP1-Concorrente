@@ -58,10 +58,50 @@ static double calcula_proxima_posicao(ciclista * cicl) {
     return posicao_atual;
 }
 
+static int pontuacao(int colocacao) {
+    int pontos;
+    switch(colocacao) {
+        case 1:
+            pontos = 45;
+            break;
+        case 2:
+            pontos = 35;
+            break;
+        case 3:
+            pontos = 25;
+            break;
+        case 4:
+            pontos = 15;
+            break;
+        case 5:
+            pontos = 10;
+            break;
+        case 6:
+            pontos = 5;
+            break;
+        default:
+            pontos = 0;
+            break;
+    }
+    return pontos;
+}
+
+void adiciona_pontuacao(ciclista *c, Terreno t, int colocacao) {
+    switch(t) {
+        case PLANOCP:
+            c->pontos_plano += pontuacao(colocacao);
+            break;
+        case DESCIDACP:
+            c->pontos_montanha += pontuacao(colocacao);
+            break;
+    }
+}
+
 /* Função que simula um ciclista */
 void *thread_ciclista(void *arg) {
     ciclista *cicl = (ciclista *) arg;
     int indice_checkpoint = 0;
+    int colocacao;
     while (cicl->posicao_estrada < d) {
         double prox_posicao = calcula_proxima_posicao (cicl);
         int km_atual = (int) cicl->posicao_estrada;
@@ -78,10 +118,6 @@ void *thread_ciclista(void *arg) {
                 break;
             } else {
                 /* TODO Verificar checkpoints */
-                if (km_atual >= 0 && (terreno[km_atual] & CP)) {
-                    queue_put(&checkpoints[indice_checkpoint], cicl);
-                    indice_checkpoint++;
-                }
                 if (km_atual + 1 == d) {
                     queue_remove(&estrada[km_atual], cicl);
                     cicl->posicao_estrada = d;
@@ -94,6 +130,12 @@ void *thread_ciclista(void *arg) {
                     cicl->posicao_estrada = km_atual + 0.9999999;
                     break;
                 } else {
+                    if (km_atual >= 0 && (terreno[km_atual] & CP)) {
+                        queue_put(&checkpoints[indice_checkpoint], cicl);
+                        colocacao = queue_size(&checkpoints[indice_checkpoint]);
+                        adiciona_pontuacao(cicl, terreno[km_atual], colocacao);
+                        indice_checkpoint++;
+                    }
                     printf("ID: %d - andou pq fila tem só %d ciclistas\n", cicl->id, queue_size(&estrada[km_atual+1]));
                     if (km_atual >= 0)
                         queue_remove(&estrada[km_atual], cicl);
