@@ -184,7 +184,7 @@ static int sorteia_velocidade() {
  * Se modo_vel == 'A', cria 3 velocidades aleatorias no intervalo [20,80)
  * Caso contrario, as 3 velocidades sao 50
  */
-void inicializa_vel(ciclista *c, char modo_vel) {
+static void inicializa_vel(ciclista *c, char modo_vel) {
     if(modo_vel == 'A'){
         c->vel_plano = sorteia_velocidade();
         c->vel_sub = sorteia_velocidade();

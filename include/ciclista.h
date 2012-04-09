@@ -21,11 +21,14 @@ typedef struct biker {
     int vel_desc;           /* Velocidade do Ciclista em trechos de Descida em Km/h */
     int pontos_plano;       /* Pontuação do Ciclista para trechos Planos */
     int pontos_montanha;    /* Pontuação do Ciclista para trechos de Montanha */
-    double posicao_estrada; /* Km da estrada em que está. */
+    double posicao_estrada; /* Km da estrada em que esta. */
 } ciclista;
 
+/* Funcao executada por uma thread ciclista
+ * Simula um ciclista
+ */
 void *thread_ciclista(void *arg);
-void inicializa_vel(ciclista *c, char modo_vel);
+/* Cria as threads ciclistas e imprime suas velocidades */
 int cria_ciclistas(int m, char modo_vel, int * numthreads);
 
 #endif
