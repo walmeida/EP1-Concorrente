@@ -19,7 +19,10 @@
 /* Descida com Checkpoint */
 #define DESCIDACP 6
 
-/* Trecho com checkpoint é igual ao Trecho + 4 xD */
+/* Trecho com checkpoint eh igual ao Trecho + 4 xD */
+/* Estas mascaras permitem verificar facilmente o tipo
+ * de terreno e se ele contem um checkpoint.
+ */
 #define CP 4 
 #define TIPO_TERR_MASK 3
 

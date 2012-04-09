@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/* Inicializa uma queue */
 void queue_init(queue *root) {
     root->head = NULL;
     root->tail = NULL;
@@ -24,7 +25,7 @@ void queue_destroy(queue *root) {
     }
 }
 
-/* put on tail */
+/* Insere um item no final da queue */
 void queue_put(queue *root, Item *data) {
     node *mynode;
     if (!root)
@@ -44,7 +45,7 @@ void queue_put(queue *root, Item *data) {
     root->size++;
 }
 
-/* get from head */
+/* Retorna um item do comeco da queue */
 Item *queue_get(queue *root) {
     if (!root)
         return NULL;
@@ -60,6 +61,7 @@ Item *queue_get(queue *root) {
     return d;
 }
 
+/* Remove um item da queue */
 void queue_remove(queue *root, Item *data) {
     if (!root)
         return;
@@ -84,18 +86,21 @@ void queue_remove(queue *root, Item *data) {
     }
 }
 
+/* Retorna o numero de elementos na queue */
 int queue_size(queue *root) {
     if (root)
         return root->size;
     return -1;
 }
 
+/* Retorna um iterador para os elementos da queue */
 void *queue_get_iterator(queue *root) {
     if (!root)
         return NULL;
     return root->head;
 }
 
+/* Recebe um iterador para a queue e devolove o item desta posicao */
 Item * queue_get_iterator_data (void * iterator) {
     node *it = (node *) iterator;
     if (!it)
@@ -103,6 +108,7 @@ Item * queue_get_iterator_data (void * iterator) {
     return it->data;
 }
 
+/* Retorna um iterador para a proxima posicao da queue */
 void *queue_iterator_next(void *iterator) {
     node *it = (node *) iterator;
     if (!it)
