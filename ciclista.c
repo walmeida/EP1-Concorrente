@@ -20,8 +20,10 @@ static double calcula_proxima_posicao(ciclista * cicl) {
     double dist_ate_prox_terreno;
     for (tempo_simulado = 0;
             tempo_simulado < 1; tempo_simulado += tempo_trecho) {
-        if (posicao_atual >= d)
+        if (posicao_atual >= d) {
+            posicao_atual = d;
             break;
+        }
         dist_ate_prox_terreno = 1 + (int) posicao_atual - posicao_atual;
         terr = TIPO_TERR_MASK & terreno[(int) posicao_atual];
         switch (terr) {
@@ -40,13 +42,16 @@ static double calcula_proxima_posicao(ciclista * cicl) {
                 cicl->id, dist_ate_prox_terreno, vel, tempo_trecho, tempo_simulado);
         if (tempo_trecho + tempo_simulado > 1) {
             posicao_atual += (1 - tempo_simulado) * vel / 60;
-            printf("ID: %d - terminou em posicao %lf\n", cicl->id, posicao_atual);
+            printf("ID: %d - terminou em posicao %.8lf\n", cicl->id, posicao_atual);
             break;
         }
         printf("ID: %d - posicao_atual: %lf\n", cicl->id, posicao_atual);
         posicao_atual = 1 + (int) posicao_atual;
         printf("ID: %d - posicao_atual atualizada: %lf\n", cicl->id, posicao_atual);
     }
+    if (posicao_atual - cicl->posicao_estrada < 0.000001)
+        posicao_atual += 0.000001;
+    printf("posicao retornada: %lf\n", posicao_atual);
     return posicao_atual;
 }
 
@@ -62,17 +67,26 @@ void *thread_ciclista(void *arg) {
             if (km_atual + 1 > prox_posicao) {
                 /* TODO Verificar checkpoints (???) */
                 cicl->posicao_estrada = prox_posicao;
+                printf("nao andou para prox km\n");
                 break;
             } else {
                 /* TODO Verificar checkpoints */
-                if (queue_size(&estrada[km_atual+1]) >= n) {
-                    cicl->posicao_estrada = km_atual + 0.9999999;
+                if (km_atual + 1 == d) {
+                    cicl->posicao_estrada = d;
                     break;
                 }
-                if (km_atual >= 0)
-                    queue_remove(&estrada[km_atual++], cicl);
-                if (km_atual < d)
-                    queue_put(&estrada[km_atual], cicl);
+                if (queue_size(&estrada[km_atual+1]) >= n) {
+                    cicl->posicao_estrada = km_atual + 0.9999999;
+                    printf("empacou n = %d, queue_size = %d\n", n, queue_size(&estrada[km_atual+1]));
+                    break;
+                } else {
+                    cicl->posicao_estrada = prox_posicao;
+                    if (km_atual >= 0)
+                        queue_remove(&estrada[km_atual++], cicl);
+                    if (km_atual < d)
+                        queue_put(&estrada[km_atual], cicl);
+                    printf("andou para km %d\n", km_atual);
+                }
             }
         } while (prox_posicao > cicl->posicao_estrada);
         pthread_mutex_unlock(&estrada_mutex);

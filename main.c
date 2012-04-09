@@ -19,6 +19,9 @@ Terreno *terreno;       /* Vetor do comprimento da estrada que indica o "tipo do
 queue * checkpoints;    /* Vetor de filas. Cada elemento da fila é um ciclista que passou pelo CP. */
 int numtrechos;         /* Serve para indicar o tamanho do vetor de checkpoints */
 int tempo;              /* Variável compartilhada do minuto sendo simulado; */
+pthread_mutex_t tempo_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t tempo_cond = PTHREAD_COND_INITIALIZER;
+
 cleanup_queue cq;
 
 void monta_terreno(int ini, int fim, int checkpoint, Terreno trecho){
