@@ -215,7 +215,7 @@ int main(int argc, char* argv[]){
     printf ("numthreads: %d\n", numthreads);
     join_threads();
     /* TODO: imprimir relatorio; */
-    imprime_relatorio();
+    imprime_relatorio(numcheckpoints);
     cleanup_queue_destroy();
     if(pthread_mutex_destroy(&tempo_mutex))
         printf("Erro destruindo tempo_mutex\n");

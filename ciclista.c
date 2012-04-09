@@ -130,18 +130,19 @@ void *thread_ciclista(void *arg) {
                     cicl->posicao_estrada = km_atual + 0.9999999;
                     break;
                 } else {
-                    if (km_atual >= 0 && (terreno[km_atual] & CP)) {
-                        queue_put(&checkpoints[indice_checkpoint], cicl);
-                        colocacao = queue_size(&checkpoints[indice_checkpoint]);
-                        adiciona_pontuacao(cicl, terreno[km_atual], colocacao);
-                        indice_checkpoint++;
-                    }
                     printf("ID: %d - andou pq fila tem só %d ciclistas\n", cicl->id, queue_size(&estrada[km_atual+1]));
                     if (km_atual >= 0)
                         queue_remove(&estrada[km_atual], cicl);
                     km_atual++;
                     if (km_atual < d)
                         queue_put(&estrada[km_atual], cicl);
+                    if (km_atual >= 0 && (terreno[km_atual] & CP)) {
+                        printf("ID: %d - Passando por CP no km %d\n", cicl->id, km_atual);
+                        queue_put(&checkpoints[indice_checkpoint], cicl);
+                        colocacao = queue_size(&checkpoints[indice_checkpoint]);
+                        adiciona_pontuacao(cicl, terreno[km_atual], colocacao);
+                        indice_checkpoint++;
+                    }
                 }
             }
         } while (prox_posicao > cicl->posicao_estrada);
@@ -151,7 +152,7 @@ void *thread_ciclista(void *arg) {
         pthread_mutex_lock(&tempo_mutex);
         tempo_numthreads++;
         if (tempo_numthreads == numthreads) {
-            printf("Terminou instante de tempo %d\n", tempo);
+            printf("Terminou instante de tempo %d\n\n", tempo);
             tempo++;
             tempo_numthreads = 0;
             pthread_cond_broadcast(&tempo_cond);
