@@ -222,11 +222,10 @@ int cria_ciclistas(int m, char modo_vel, int * numciclistas) {
         cicl = (ciclista *) queue_get_iterator_data(j);
         if (pthread_create(&(cicl->tid), NULL, (void *) thread_ciclista, (void *) cicl))
             return 1;
-        printf("created thread %d\n",cicl->id);
         (*numciclistas)++;
         j = queue_iterator_next(j);
     }
 
-    /* TODO: Destruir a lista de ciclista */
+    queue_destroy(&ciclistas);
     return 0;
 }

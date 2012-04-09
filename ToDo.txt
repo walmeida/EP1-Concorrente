@@ -45,8 +45,6 @@ Funções:
 - Impressão das colocações finais nas 3 etapas.
 
 -------------------------------------------------------------------------
-Imprimir as listas separadas (usar sort?)
-
 Comentar
 LEIAME completo
 Relatório

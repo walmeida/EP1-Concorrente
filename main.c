@@ -102,6 +102,7 @@ void leitura_entrada(char *nome_arquivo, int *m, int *n, char *modo_vel,
         }
         aux += k;
     }
+    fclose(arq_entrada);
 }
 
 void join_threads() {
@@ -159,7 +160,7 @@ void imprime_relatorio(int numciclistas, int numcheckpoints){
     int i;
     int k;
     ciclista *c;
-    cicl_colocacao *colocacao = malloc(numciclistas*sizeof(colocacao));
+    cicl_colocacao *colocacao = malloc(numciclistas*sizeof(*colocacao));
     if (!colocacao) {
         printf("Erro alocando memoria para colocacao final\n");
         return;
@@ -214,11 +215,31 @@ void imprime_relatorio(int numciclistas, int numcheckpoints){
     for (i = 0; i < numciclistas; ++i) {
         printf("%2d\t %6d\n", colocacao[i].id, colocacao[i].pontos);
     }
+
+    free(colocacao);
+}
+
+void libera_memoria(int numcheckpoints) {
+    ciclista * cicl;
+    int i;
+    void *j = queue_get_iterator(&listadechegada);
+    while(j) {
+        cicl = (ciclista *) queue_get_iterator_data(j);
+        free(cicl);
+        j = queue_iterator_next(j);
+    }
+    queue_destroy(&listadechegada);
+    for(i = 0; i < numcheckpoints; ++i) {
+        queue_destroy(&checkpoints[i]);
+    }
+    free(checkpoints);
+    free(terreno);
+    free(estrada);
 }
 
 int main(int argc, char* argv[]){
-    int m;              /* Número de ciclistas */
-    char modo_vel;      /* Modo de Criação da Velocidade:  'A' - Aleatório / 'U' - Uniforme  */
+    int m;              /* Numero de ciclistas */
+    char modo_vel;      /* Modo de Criacao da Velocidade:  'A' - Aleatorio / 'U' - Uniforme  */
     int i;
     unsigned int iseed = (unsigned int) time(NULL);
     srand (iseed);
@@ -257,10 +278,10 @@ int main(int argc, char* argv[]){
         return 2;
     }
     numthreads = numciclistas;
-    printf ("numthreads: %d\n", numthreads);
     join_threads();
     /* TODO: imprimir relatorio; */
     imprime_relatorio(m, numcheckpoints);
+    libera_memoria(numcheckpoints);
     cleanup_queue_destroy();
     if(pthread_mutex_destroy(&tempo_mutex))
         printf("Erro destruindo tempo_mutex\n");

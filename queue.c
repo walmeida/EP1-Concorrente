@@ -8,6 +8,22 @@ void queue_init(queue *root) {
     root->size = 0;
 }
 
+/* Libera memoria consumida pela queue.
+ * Nao libera memoria dos itens (data) inseridos
+ */
+void queue_destroy(queue *root) {
+    if(!root)
+        return;
+    node *mynode, *prevnode;
+    mynode = root->head; 
+    prevnode = NULL;
+    while (mynode) {
+        prevnode = mynode;
+        mynode = mynode->next;
+        free(prevnode);
+    }
+}
+
 /* put on tail */
 void queue_put(queue *root, Item *data) {
     node *mynode;
