@@ -9,9 +9,10 @@
 #include "threads.h"
 
 
-queue *estrada;           /* Vetor Compartilhado da Estrada */
+queue *estrada;         /* Vetor Compartilhado da Estrada */
 pthread_mutex_t estrada_mutex = PTHREAD_MUTEX_INITIALIZER;
 int d;                  /* Distância em Km */
+int n;                  /* Largura da Pista */
 
 Terreno *terreno;       /* Vetor do comprimento da estrada que indica o "tipo do solo" */
 
@@ -132,7 +133,6 @@ int cleanup_queue_destroy() {
 
 int main(int argc, char* argv[]){
     int m;              /* Número de ciclistas */
-    int n;              /* Largura da Pista */
     char modo_vel;      /* Modo de Criação da Velocidade:  'A' - Aleatório / 'U' - Uniforme  */
     int numthreads = 0;
     int i;

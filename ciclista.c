@@ -60,12 +60,15 @@ void *thread_ciclista(void *arg) {
         pthread_mutex_lock(&estrada_mutex);
         do {
             if (km_atual + 1 > prox_posicao) {
-                /* TODO Verificar checkpoints */
+                /* TODO Verificar checkpoints (???) */
                 cicl->posicao_estrada = prox_posicao;
                 break;
             } else {
-                /* TODO Verificar se pode andar mais um km */
                 /* TODO Verificar checkpoints */
+                if (queue_size(&estrada[km_atual+1]) >= n) {
+                    cicl->posicao_estrada = km_atual + 0.9999999;
+                    break;
+                }
                 if (km_atual >= 0)
                     queue_remove(&estrada[km_atual++], cicl);
                 if (km_atual < d)
@@ -74,6 +77,7 @@ void *thread_ciclista(void *arg) {
         } while (prox_posicao > cicl->posicao_estrada);
         pthread_mutex_unlock(&estrada_mutex);
         /* fim seção crítica */
+        /* TODO simular tempo */
     }
     printf("Thread %d finished the simulation...\n", cicl->id);
     pthread_mutex_lock(&cq.mutex);

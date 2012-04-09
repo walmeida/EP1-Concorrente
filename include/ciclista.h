@@ -6,6 +6,7 @@
 
 extern int tempo;
 extern int d;
+extern int n;
 extern Terreno *terreno;
 extern pthread_mutex_t estrada_mutex;
 
