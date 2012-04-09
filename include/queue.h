@@ -4,7 +4,7 @@
 #include "ciclista.h"
 typedef ciclista Item;
 
-// FIFO queue
+/* FIFO queue */
 
 typedef struct node {
     struct node *next;

@@ -3,7 +3,7 @@ ODIR = obj
 BDIR = bin
 
 CC = gcc
-CFLAGS = -Wall -I$(IDIR) -g
+CFLAGS = -ansi -Wall -I$(IDIR) -g
 LIBS = -lpthread
 
 EXE = tourdefrance

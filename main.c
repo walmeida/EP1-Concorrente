@@ -9,17 +9,15 @@
 #include "threads.h"
 
 
-int *estrada;           // Vetor Compartilhado da Estrada
-int d;                  // Distância em Km
+int *estrada;           /* Vetor Compartilhado da Estrada */
+int d;                  /* Distância em Km */
 
-Terreno *terreno;       // Vetor do comprimento da estrada que indica o "tipo do solo"
+Terreno *terreno;       /* Vetor do comprimento da estrada que indica o "tipo do solo" */
 
-queue * checkpoints;    // Vetor de filas. Cada elemento da fila é um ciclista que passou pelo CP.
-int numtrechos;         // Serve para indicar o tamanho do vetor de checkpoints
-int tempo;              // Variável compartilhada do minuto sendo simulado;
+queue * checkpoints;    /* Vetor de filas. Cada elemento da fila é um ciclista que passou pelo CP. */
+int numtrechos;         /* Serve para indicar o tamanho do vetor de checkpoints */
+int tempo;              /* Variável compartilhada do minuto sendo simulado; */
 cleanup_queue cq;
-extern int workers_active; // Variavel compartilhada que diz se os ciclistas devem ou nao realizar a
-                           // simulacao.
 
 void monta_terreno(int ini, int fim, int checkpoint, Terreno trecho){
   int i;
@@ -67,13 +65,13 @@ void leitura_entrada(char *nome_arquivo, int *m, int *n, char *modo_vel) {
         printf("trecho: %c - k: %d\n",trecho,k);
         
         switch(trecho){
-            case 'P': // Trecho Plano
+            case 'P': /* Trecho Plano */
                 monta_terreno(aux, aux + k, aux + k/2, PLANO);
                 break;
-            case 'S': // Trecho Subida
+            case 'S': /* Trecho Subida */
                 monta_terreno(aux, aux + k, -1, SUBIDA);
                 break;
-            case 'D': // Trecho Descida
+            case 'D': /* Trecho Descida */
                 monta_terreno(aux, aux + k, aux, DESCIDA);
                 break;
             default:
@@ -82,7 +80,7 @@ void leitura_entrada(char *nome_arquivo, int *m, int *n, char *modo_vel) {
         aux += k;
         numtrechos++;
     }
-    //Checkpoint final
+    /* Checkpoint final */
     terreno[d-1] = terreno[d-1] + CP;
 }
 
@@ -132,9 +130,9 @@ int cleanup_queue_destroy() {
 }
 
 int main(int argc, char* argv[]){
-    int m;              // Número de ciclistas
-    int n;              // Largura da Pista
-    char modo_vel;      // Modo de Criação da Velocidade:  'A' - Aleatório / 'U' - Uniforme 
+    int m;              /* Número de ciclistas */
+    int n;              /* Largura da Pista */
+    char modo_vel;      /* Modo de Criação da Velocidade:  'A' - Aleatório / 'U' - Uniforme  */
     int numthreads = 0;
     int i;
     unsigned int iseed = (unsigned int) time(NULL);
@@ -148,14 +146,15 @@ int main(int argc, char* argv[]){
     }
     cleanup_queue_init ();
     leitura_entrada(argv[1], &m, &n, &modo_vel);
-    // Criando o vetor de CP
+    /* Criando o vetor de CP */
     checkpoints = malloc(numtrechos*sizeof(*checkpoints));
     for(i = 0; i < numtrechos; i++) {
         queue_init(&checkpoints[i]);
     }
-    
+
+    tempo = 0;
     if (cria_ciclistas(m, modo_vel, &numthreads)) {
-        // Erro ao criar alguma thread
+        /* Erro ao criar alguma thread */
         fprintf(stderr, "Error starting threads!\n");
         join_threads(numthreads);
         cleanup_queue_destroy ();
@@ -163,7 +162,7 @@ int main(int argc, char* argv[]){
     }
     printf ("numthreads: %d\n", numthreads);
     join_threads(numthreads);
-    //TODO: imprimir relatorio;
+    /* TODO: imprimir relatorio; */
     cleanup_queue_destroy ();
         
     return 0;

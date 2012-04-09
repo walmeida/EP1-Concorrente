@@ -8,7 +8,7 @@ void queue_init(queue *root) {
     root->size = 0;
 }
 
-// put on tail
+/* put on tail */
 void queue_put(queue *root, Item *data) {
     node *mynode;
     if (!root)
@@ -28,7 +28,7 @@ void queue_put(queue *root, Item *data) {
     root->size++;
 }
 
-// get from head
+/* get from head */
 Item *queue_get(queue *root) {
     if (!root)
         return NULL;
