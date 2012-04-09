@@ -144,9 +144,10 @@ int cleanup_queue_destroy() {
     return 0;
 }
 
-void imprime_relatorio(){
+void imprime_relatorio(int numcheckpoints){
     void *j = queue_get_iterator(&listadechegada);
     int i = 1;
+    int k;
     ciclista *c;
     printf("LISTA DE CHEGADA!!!!!\n");
     while(j){
@@ -154,6 +155,19 @@ void imprime_relatorio(){
         printf("%5d lugar. - ID: %d\n",i,c->id);
         j = queue_iterator_next(j);
         i++;
+    }
+
+
+    for(k = 0; k < numcheckpoints; ++k) {
+        printf("\nImprimindo checkpoint %d\n", k);
+        j = queue_get_iterator(&checkpoints[k]);
+        i = 1;
+        while(j) {
+            c =  (ciclista *) queue_get_iterator_data(j);
+            printf("%5d lugar. - ID: %d\n",i,c->id);
+            j = queue_iterator_next(j);
+            i++;
+        }
     }
 }
 
