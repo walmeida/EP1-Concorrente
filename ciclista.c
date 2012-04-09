@@ -70,18 +70,8 @@ void *thread_ciclista(void *arg) {
             printf("km atual: %d\n", km_atual);
             if (km_atual + 1 > prox_posicao) {
                 /* TODO Verificar checkpoints (???) */
-                /*if (cicl->posicao_estrada < 0) {
-                    if (queue_size(&estrada[0]) < n) {
-                        printf("ID: %d - andou (caso esp) pq fila só tem %d ciclistas\n", cicl->id, queue_size(&estrada[0]));
-                        queue_put(&estrada[0], cicl);
-                        cicl->posicao_estrada = prox_posicao;
-                    } else {
-                        printf("ID: %d - nao andou\n", cicl->id);
-                    }
-                } else {*/
-                    cicl->posicao_estrada = prox_posicao;
-                    printf("ID: %d - nao andou\n", cicl->id);
-/*                }                            */
+                cicl->posicao_estrada = prox_posicao;
+                printf("ID: %d - nao andou\n", cicl->id);
                 break;
             } else {
                 /* TODO Verificar checkpoints */
@@ -148,9 +138,10 @@ void inicializa_vel(ciclista *c, char modo_vel) {
     }
 }
 
-int cria_ciclistas(int m, char modo_vel, int * numthreads) {
+int cria_ciclistas(int m, char modo_vel, int * numciclistas) {
     int i;
     ciclista * cicl;
+    *numciclistas = 0;
     for (i = 0; i < m; ++i) {
         cicl = (ciclista *) malloc (sizeof (*cicl));
         cicl->id = i;
@@ -160,7 +151,7 @@ int cria_ciclistas(int m, char modo_vel, int * numthreads) {
         if (pthread_create(&(cicl->tid), NULL, (void *) thread_ciclista, (void *) cicl))
             return 1;
         printf("created thread %d\n",cicl->id);
-        (*numthreads)++;
+        (*numciclistas)++;
     }
     return 0;
 }

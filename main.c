@@ -22,16 +22,16 @@ int tempo;              /* Variável compartilhada do minuto sendo simulado; */
 int tempo_numthreads;   /* Variável compartilhada de threads que simularam aquele instante de tempo. */
 pthread_mutex_t tempo_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t tempo_cond = PTHREAD_COND_INITIALIZER;
-int numthreads = 0;
+int numthreads;
 
 cleanup_queue cq;
 
 void monta_terreno(int ini, int fim, int checkpoint, Terreno trecho){
-  int i;
-  for(i = ini; i < fim; i++){
-    terreno[i] = trecho;
-  }
-  if(checkpoint != -1) terreno[checkpoint] = trecho + CP;
+    int i;
+    for(i = ini; i < fim; i++){
+        terreno[i] = trecho;
+    }
+    if(checkpoint != -1) terreno[checkpoint] = trecho + CP;
 }
 
 void leitura_entrada(char *nome_arquivo, int *m, int *n, char *modo_vel) {
@@ -150,6 +150,7 @@ int main(int argc, char* argv[]){
     int i;
     unsigned int iseed = (unsigned int) time(NULL);
     srand (iseed);
+    int numciclistas = 0;
     
     numtrechos = 0;
     
@@ -172,13 +173,16 @@ int main(int argc, char* argv[]){
 
     tempo = 0;
     tempo_numthreads = 0;
-    if (cria_ciclistas(m, modo_vel, &numthreads)) {
+    numthreads = m;
+    if (cria_ciclistas(m, modo_vel, &numciclistas)) {
         /* Erro ao criar alguma thread */
+        numthreads = numciclistas;
         fprintf(stderr, "Error starting threads!\n");
         join_threads();
         cleanup_queue_destroy ();
         return 2;
     }
+    numthreads = numciclistas;
     printf ("numthreads: %d\n", numthreads);
     join_threads();
     /* TODO: imprimir relatorio; */
