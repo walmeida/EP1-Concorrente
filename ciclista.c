@@ -35,7 +35,7 @@ static double calcula_proxima_posicao(ciclista * cicl) {
                 vel = cicl->vel_desc;
                 break;
         }
-        tempo_trecho = 60 * dist_ate_prox_terreno / vel;
+        tempo_trecho = (60 * dist_ate_prox_terreno) / vel;
         printf("ID: %d - dist_prox: %lf, vel: %d, temp_t: %lf, temp_sim: %lf\n",
                 cicl->id, dist_ate_prox_terreno, vel, tempo_trecho, tempo_simulado);
         if (tempo_trecho + tempo_simulado > 1) {

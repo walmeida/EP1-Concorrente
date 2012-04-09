@@ -124,7 +124,7 @@ int cleanup_queue_init() {
 }
 
 int cleanup_queue_destroy() {
-    if (pthread_cond_destroy(&(cq.cond)))
+    if (pthread_mutex_destroy(&(cq.mutex)))
         return 1;
     if (pthread_cond_destroy(&(cq.cond)))
         return 1;
