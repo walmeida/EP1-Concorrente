@@ -54,7 +54,6 @@ static double calcula_proxima_posicao(ciclista * cicl) {
     }
     if (posicao_atual - cicl->posicao_estrada < 0.000001)
         posicao_atual += 0.000001;
-    printf("ID: %d - foi de %.10lf para %.10lf com velocidade %d\n", cicl->id, cicl->posicao_estrada, posicao_atual, vel);
     return posicao_atual;
 }
 
@@ -107,39 +106,40 @@ void *thread_ciclista(void *arg) {
         int km_atual = (int) cicl->posicao_estrada;
         if (cicl->posicao_estrada < 0)
             km_atual = -1;
-        /* seção crítica da estrada */
+        /* secao critica da estrada */
         pthread_mutex_lock(&estrada_mutex);
         do {
-            printf("km atual: %d\n", km_atual);
             if (km_atual + 1 > prox_posicao) {
-                /* TODO Verificar checkpoints (???) */
+                /* Continua dentro do mesmo kilometro */
                 cicl->posicao_estrada = prox_posicao;
-                printf("ID: %d - nao andou\n", cicl->id);
                 break;
             } else {
-                /* TODO Verificar checkpoints */
                 if (km_atual + 1 == d) {
+                    /* Terminou a corrida */
                     queue_remove(&estrada[km_atual], cicl);
                     cicl->posicao_estrada = d;
-                    printf("ID: %d - Terminou corrida\n", cicl->id);
+                    printf("ID: %d - Terminou a corrida\n", cicl->id);
                     queue_put(&listadechegada, cicl);
                     break;
                 }
                 if (queue_size(&estrada[km_atual+1]) >= n) {
-                    printf("ID: %d - empacou pq ja tem %d ciclistas\n", cicl->id, queue_size(&estrada[km_atual+1]));
+                    /* Nao eh possivel ir para o proximo kilometro por falta de espaco */
                     cicl->posicao_estrada = km_atual + 0.9999999;
                     break;
                 } else {
-                    printf("ID: %d - andou pq fila tem só %d ciclistas\n", cicl->id, queue_size(&estrada[km_atual+1]));
+                    /* Andando para o proximo kilometro */
                     if (km_atual >= 0)
                         queue_remove(&estrada[km_atual], cicl);
                     km_atual++;
                     if (km_atual < d)
                         queue_put(&estrada[km_atual], cicl);
                     if (km_atual >= 0 && (terreno[km_atual] & CP)) {
-                        printf("ID: %d - Passando por CP no km %d\n", cicl->id, km_atual);
                         queue_put(&checkpoints[indice_checkpoint], cicl);
                         colocacao = queue_size(&checkpoints[indice_checkpoint]);
+                        if (colocacao <= 3) {
+                            printf("ID: %d - Passando por Checkpoint no Km %d (%d lugar)\n",
+                                    cicl->id, km_atual, colocacao);
+                        }
                         adiciona_pontuacao(cicl, terreno[km_atual], colocacao);
                         indice_checkpoint++;
                     }
@@ -147,8 +147,11 @@ void *thread_ciclista(void *arg) {
             }
         } while (prox_posicao > cicl->posicao_estrada);
         pthread_mutex_unlock(&estrada_mutex);
-        /* fim seção crítica estrada */
-        /* seção crítica do tempo */
+        printf("ID: %d - Esta na posicao %.9lf\n", cicl->id, cicl->posicao_estrada);
+        /* fim secao critica estrada */
+        if (cicl->posicao_estrada >= d)
+            break;
+        /* secao critica do tempo */
         pthread_mutex_lock(&tempo_mutex);
         tempo_numthreads++;
         if (tempo_numthreads == numthreads) {
@@ -160,9 +163,8 @@ void *thread_ciclista(void *arg) {
             pthread_cond_wait(&tempo_cond, &tempo_mutex);
         }
         pthread_mutex_unlock(&tempo_mutex);
-        /* fim seção crítica do tempo */
+        /* fim secao critica do tempo */
     }
-    printf("Thread %d finished the simulation...\n", cicl->id);
     pthread_mutex_lock(&cq.mutex);
     queue_put(&cq.cleanup, cicl);
     pthread_mutex_unlock(&cq.mutex);

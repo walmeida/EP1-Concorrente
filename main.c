@@ -48,11 +48,10 @@ void leitura_entrada(char *nome_arquivo, int *m, int *n, char *modo_vel,
     while (*modo_vel != 'A' && *modo_vel != 'U') {
         fscanf(arq_entrada,"%c", modo_vel);
         if (feof (arq_entrada)) {
-            printf ("Oh oh!\n");
+            printf ("Erro no arquivo de entrada!\n");
             exit (-2);
         }
     }
-    printf ("Modo vel: %c\n", *modo_vel);
     fscanf(arq_entrada,"%d", &d);
     terreno = (Terreno *) malloc(d*sizeof(*terreno));
     if (!terreno) {
@@ -64,13 +63,12 @@ void leitura_entrada(char *nome_arquivo, int *m, int *n, char *modo_vel,
         trecho = 'E';
         while (trecho != 'P' && trecho != 'S' && trecho != 'D') {
             if (!fscanf(arq_entrada,"%c", &trecho)) {
-                printf("Não foi possível ler o bang!\n");
+                printf("Erro na leitura da entrada!\n");
                 exit(-2);
             }
         }
         
         fscanf(arq_entrada,"%d", &k);
-        printf("trecho: %c - k: %d\n",trecho,k);
         
         switch(trecho){
             case 'P': /* Trecho Plano */
@@ -93,7 +91,6 @@ void leitura_entrada(char *nome_arquivo, int *m, int *n, char *modo_vel,
 
 void join_threads() {
   ciclista *curnode;
-  printf("joining threads...\n");
   while (numthreads) {
       pthread_mutex_lock(&cq.mutex);
       /* below, we sleep until there really is a new cleanup node.  This
@@ -113,7 +110,6 @@ void join_threads() {
       curnode = (ciclista *) queue_get(&cq.cleanup);
       pthread_mutex_unlock(&cq.mutex);
       pthread_join(curnode->tid, NULL);
-      printf("joined with thread %d\n", curnode->id);
       /*free(curnode);*/
       numthreads--;
       pthread_mutex_lock(&tempo_mutex);
@@ -149,7 +145,7 @@ void imprime_relatorio(int numcheckpoints){
     int i = 1;
     int k;
     ciclista *c;
-    printf("LISTA DE CHEGADA!!!!!\n");
+    printf("\nLISTA DE CHEGADA!!!!!\n");
     printf("ID\t Colocacao Chegada\t Pontos Camisa Verde\t Pontos Camisa Vermelha\n");
     while(j){
         c =  (ciclista *) queue_get_iterator_data(j);
