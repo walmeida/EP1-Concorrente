@@ -150,9 +150,10 @@ void imprime_relatorio(int numcheckpoints){
     int k;
     ciclista *c;
     printf("LISTA DE CHEGADA!!!!!\n");
+    printf("ID\t Colocacao Chegada\t Pontos Camisa Verde\t Pontos Camisa Vermelha\n");
     while(j){
         c =  (ciclista *) queue_get_iterator_data(j);
-        printf("%5d lugar. - ID: %d\n",i,c->id);
+        printf("%2d\t %17d\t %19d\t %22d\n", c->id, i, c->pontos_plano, c->pontos_montanha);
         j = queue_iterator_next(j);
         i++;
     }
