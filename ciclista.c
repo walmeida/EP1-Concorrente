@@ -39,19 +39,20 @@ static double calcula_proxima_posicao(ciclista * cicl) {
                 break;
         }
         tempo_trecho = (60 * dist_ate_prox_terreno) / vel;
-        printf("ID: %d - dist_prox: %lf, vel: %d, temp_t: %lf, temp_sim: %lf\n",
-                cicl->id, dist_ate_prox_terreno, vel, tempo_trecho, tempo_simulado);
+        /*printf("ID: %d - dist_prox: %lf, vel: %d, temp_t: %lf, temp_sim: %lf\n",
+                cicl->id, dist_ate_prox_terreno, vel, tempo_trecho, tempo_simulado);*/
         if (tempo_trecho + tempo_simulado > 1) {
             posicao_atual += (1 - tempo_simulado) * vel / 60;
-            printf("ID: %d - terminou em posicao %.8lf\n", cicl->id, posicao_atual);
+            /*printf("ID: %d - terminou em posicao %.8lf\n", cicl->id, posicao_atual);*/
             break;
         }
-        printf("ID: %d - posicao_atual: %lf\n", cicl->id, posicao_atual);
+        /*printf("ID: %d - posicao_atual: %lf\n", cicl->id, posicao_atual);*/
         posicao_atual = 1 + (int) posicao_atual;
-        printf("ID: %d - posicao_atual atualizada: %lf\n", cicl->id, posicao_atual);
+        /*printf("ID: %d - posicao_atual atualizada: %lf\n", cicl->id, posicao_atual);*/
     }
     if (posicao_atual - cicl->posicao_estrada < 0.000001)
         posicao_atual += 0.000001;
+    printf("ID: %d - foi de %.10lf para %.10lf com velocidade %d\n", cicl->id, cicl->posicao_estrada, posicao_atual, vel);
     return posicao_atual;
 }
 
@@ -66,18 +67,32 @@ void *thread_ciclista(void *arg) {
         do {
             if (km_atual + 1 > prox_posicao) {
                 /* TODO Verificar checkpoints (???) */
-                cicl->posicao_estrada = prox_posicao;
+                if (cicl->posicao_estrada < 0) {
+                    if (queue_size(&estrada[0]) < n) {
+                        printf("ID: %d - andou (caso esp) pq fila só tem %d ciclistas\n", cicl->id, queue_size(&estrada[0]));
+                        queue_put(&estrada[0], cicl);
+                        cicl->posicao_estrada = prox_posicao;
+                    } else {
+                        printf("ID: %d - nao andou\n", cicl->id);
+                    }
+                } else {
+                    cicl->posicao_estrada = prox_posicao;
+                    printf("ID: %d - nao andou\n", cicl->id);
+                }                            
                 break;
             } else {
                 /* TODO Verificar checkpoints */
                 if (km_atual + 1 == d) {
                     cicl->posicao_estrada = d;
+                    printf("ID %d - Terminou corrida\n", cicl->id);
                     break;
                 }
                 if (queue_size(&estrada[km_atual+1]) >= n) {
+                    printf("ID %d - empacou pq ja tem %d ciclistas\n", cicl->id, queue_size(&estrada[km_atual+1]));
                     cicl->posicao_estrada = km_atual + 0.9999999;
                     break;
                 } else {
+                    printf("ID %d - andou pq fila tem só %d ciclistas\n", cicl->id, queue_size(&estrada[km_atual+1]));
                     cicl->posicao_estrada = prox_posicao;
                     if (km_atual >= 0)
                         queue_remove(&estrada[km_atual++], cicl);
@@ -89,10 +104,11 @@ void *thread_ciclista(void *arg) {
         pthread_mutex_unlock(&estrada_mutex);
         /* fim seção crítica estrada */
         /* seção crítica do tempo */
-        /* TODO simular tempo */
         pthread_mutex_lock(&tempo_mutex);
         tempo_numthreads++;
         if (tempo_numthreads == numthreads) {
+            printf("Terminou instante de tempo %d\n", tempo);
+            tempo++;
             tempo_numthreads = 0;
             pthread_cond_broadcast(&tempo_cond);
         } else {

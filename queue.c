@@ -60,12 +60,12 @@ void queue_remove(queue *root, Item *data) {
                 root->tail = prev_node;
             }
             free(mynode);
+            root->size--;
             break;
         }
         prev_node = mynode;
         mynode = mynode->next;
     }
-    root->size--;
 }
 
 int queue_size(queue *root) {

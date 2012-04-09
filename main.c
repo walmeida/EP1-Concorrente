@@ -118,6 +118,8 @@ void join_threads() {
       numthreads--;
       pthread_mutex_lock(&tempo_mutex);
       if (tempo_numthreads == numthreads) {
+          printf("Terminou instante de tempo %d\n", tempo);
+          tempo++;
           tempo_numthreads = 0;
           pthread_cond_broadcast(&tempo_cond);
       }
@@ -180,7 +182,11 @@ int main(int argc, char* argv[]){
     printf ("numthreads: %d\n", numthreads);
     join_threads();
     /* TODO: imprimir relatorio; */
-    cleanup_queue_destroy ();
+    cleanup_queue_destroy();
+    if(pthread_mutex_destroy(&tempo_mutex))
+        printf("Erro destruindo tempo_mutex\n");
+    if(pthread_cond_destroy(&tempo_cond))
+        printf("Erro destruindo tempo_cond\n");
         
     return 0;
 }
