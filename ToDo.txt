@@ -43,3 +43,11 @@ Funções:
 - Simulação de um ciclista
 - Destruição das threads dos ciclistas
 - Impressão das colocações finais nas 3 etapas.
+
+-------------------------------------------------------------------------
+Imprimir o mano q passa no cp se ele for um dos 3 primeiros naquele cp
+Imprimir as listas separadas (usar sort?)
+
+Comentar
+LEIAME completo
+Relatório
