@@ -7,6 +7,7 @@
 extern cleanup_queue cq;
 extern queue *estrada;
 extern int numthreads;
+extern queue listadechegada;
 
 /* Devolve a nova posição do ciclista após um minuto.
  * Não verifica se é possível chegar nesta posição,
@@ -79,6 +80,7 @@ void *thread_ciclista(void *arg) {
                     queue_remove(&estrada[km_atual], cicl);
                     cicl->posicao_estrada = d;
                     printf("ID: %d - Terminou corrida\n", cicl->id);
+                    queue_put(&listadechegada, cicl);
                     break;
                 }
                 if (queue_size(&estrada[km_atual+1]) >= n) {

@@ -21,5 +21,8 @@ void queue_put(queue *root, Item *data);
 Item *queue_get(queue *root);
 void queue_remove(queue *root, Item *data);
 int queue_size(queue *root);
+void *queue_get_iterator(queue *root);
+Item * queue_get_iterator_data (void * iterator);
+void *queue_iterator_next(void *iterator);
 
 #endif

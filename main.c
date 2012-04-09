@@ -17,12 +17,12 @@ int n;                  /* Largura da Pista */
 Terreno *terreno;       /* Vetor do comprimento da estrada que indica o "tipo do solo" */
 
 queue * checkpoints;    /* Vetor de filas. Cada elemento da fila é um ciclista que passou pelo CP. */
-int numtrechos;         /* Serve para indicar o tamanho do vetor de checkpoints */
 int tempo;              /* Variável compartilhada do minuto sendo simulado; */
 int tempo_numthreads;   /* Variável compartilhada de threads que simularam aquele instante de tempo. */
 pthread_mutex_t tempo_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t tempo_cond = PTHREAD_COND_INITIALIZER;
 int numthreads;
+queue listadechegada;  /* Lista de chegada xD */
 
 cleanup_queue cq;
 
@@ -34,7 +34,8 @@ void monta_terreno(int ini, int fim, int checkpoint, Terreno trecho){
     if(checkpoint != -1) terreno[checkpoint] = trecho + CP;
 }
 
-void leitura_entrada(char *nome_arquivo, int *m, int *n, char *modo_vel) {
+void leitura_entrada(char *nome_arquivo, int *m, int *n, char *modo_vel,
+        int *numcheckpoints) {
   FILE *arq_entrada;
   int k;
     int aux = 0;
@@ -74,21 +75,20 @@ void leitura_entrada(char *nome_arquivo, int *m, int *n, char *modo_vel) {
         switch(trecho){
             case 'P': /* Trecho Plano */
                 monta_terreno(aux, aux + k, aux + k/2, PLANO);
+                (*numcheckpoints)++;
                 break;
             case 'S': /* Trecho Subida */
                 monta_terreno(aux, aux + k, -1, SUBIDA);
                 break;
             case 'D': /* Trecho Descida */
                 monta_terreno(aux, aux + k, aux, DESCIDA);
+                (*numcheckpoints)++;
                 break;
             default:
                 break;
         }
         aux += k;
-        numtrechos++;
     }
-    /* Checkpoint final */
-    terreno[d-1] = terreno[d-1] + CP;
 }
 
 void join_threads() {
@@ -114,7 +114,7 @@ void join_threads() {
       pthread_mutex_unlock(&cq.mutex);
       pthread_join(curnode->tid, NULL);
       printf("joined with thread %d\n", curnode->id);
-      free(curnode);
+      /*free(curnode);*/
       numthreads--;
       pthread_mutex_lock(&tempo_mutex);
       if (tempo_numthreads == numthreads) {
@@ -144,6 +144,19 @@ int cleanup_queue_destroy() {
     return 0;
 }
 
+void imprime_relatorio(){
+    void *j = queue_get_iterator(&listadechegada);
+    int i = 1;
+    ciclista *c;
+    printf("LISTA DE CHEGADA!!!!!\n");
+    while(j){
+        c =  (ciclista *) queue_get_iterator_data(j);
+        printf("%5d lugar. - ID: %d\n",i,c->id);
+        j = queue_iterator_next(j);
+        i++;
+    }
+}
+
 int main(int argc, char* argv[]){
     int m;              /* Número de ciclistas */
     char modo_vel;      /* Modo de Criação da Velocidade:  'A' - Aleatório / 'U' - Uniforme  */
@@ -152,17 +165,17 @@ int main(int argc, char* argv[]){
     srand (iseed);
     int numciclistas = 0;
     
-    numtrechos = 0;
+    int numcheckpoints = 0;
     
     if (argc <= 1) {
         fprintf(stderr, "Forneca o nome do arquivo de entrada como parametro.\n");
         return 1;
     }
     cleanup_queue_init ();
-    leitura_entrada(argv[1], &m, &n, &modo_vel);
+    leitura_entrada(argv[1], &m, &n, &modo_vel, &numcheckpoints);
     /* Criando o vetor de CP */
-    checkpoints = malloc(numtrechos*sizeof(*checkpoints));
-    for (i = 0; i < numtrechos; i++) {
+    checkpoints = malloc(numcheckpoints*sizeof(*checkpoints));
+    for (i = 0; i < numcheckpoints; i++) {
         queue_init(&checkpoints[i]);
     }
     /* Criando o vetor de estrada */
@@ -170,6 +183,8 @@ int main(int argc, char* argv[]){
     for (i = 0; i < d; ++i) {
         queue_init(&estrada[i]);
     }
+    /* Criando a fila de chegada */
+    queue_init(&listadechegada);
 
     tempo = 0;
     tempo_numthreads = 0;
@@ -186,6 +201,7 @@ int main(int argc, char* argv[]){
     printf ("numthreads: %d\n", numthreads);
     join_threads();
     /* TODO: imprimir relatorio; */
+    imprime_relatorio();
     cleanup_queue_destroy();
     if(pthread_mutex_destroy(&tempo_mutex))
         printf("Erro destruindo tempo_mutex\n");

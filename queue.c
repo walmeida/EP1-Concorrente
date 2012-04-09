@@ -73,3 +73,23 @@ int queue_size(queue *root) {
         return root->size;
     return -1;
 }
+
+void *queue_get_iterator(queue *root) {
+    if (!root)
+        return NULL;
+    return root->head;
+}
+
+Item * queue_get_iterator_data (void * iterator) {
+    node *it = (node *) iterator;
+    if (!it)
+        return NULL;
+    return it->data;
+}
+
+void *queue_iterator_next(void *iterator) {
+    node *it = (node *) iterator;
+    if (!it)
+        return NULL;
+    return it->next;
+}
