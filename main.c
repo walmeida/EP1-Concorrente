@@ -16,7 +16,7 @@ int n;                  /* Largura da Pista */
 
 Terreno *terreno;       /* Vetor do comprimento da estrada que indica o "tipo do solo" */
 
-queue * checkpoints;    /* Vetor de filas. Cada elemento da fila é um ciclista que passou pelo CP. */
+queue *checkpoints;    /* Vetor de filas. Cada elemento da fila é um ciclista que passou pelo CP. */
 int tempo;              /* Variável compartilhada do minuto sendo simulado; */
 int tempo_numthreads;   /* Variável compartilhada de threads que simularam aquele instante de tempo. */
 pthread_mutex_t tempo_mutex = PTHREAD_MUTEX_INITIALIZER;

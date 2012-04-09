@@ -8,6 +8,7 @@ extern cleanup_queue cq;
 extern queue *estrada;
 extern int numthreads;
 extern queue listadechegada;
+extern queue *checkpoints;
 
 /* Devolve a nova posição do ciclista após um minuto.
  * Não verifica se é possível chegar nesta posição,
@@ -60,6 +61,7 @@ static double calcula_proxima_posicao(ciclista * cicl) {
 /* Função que simula um ciclista */
 void *thread_ciclista(void *arg) {
     ciclista *cicl = (ciclista *) arg;
+    int indice_checkpoint = 0;
     while (cicl->posicao_estrada < d) {
         double prox_posicao = calcula_proxima_posicao (cicl);
         int km_atual = (int) cicl->posicao_estrada;
@@ -76,6 +78,10 @@ void *thread_ciclista(void *arg) {
                 break;
             } else {
                 /* TODO Verificar checkpoints */
+                if (km_atual >= 0 && (terreno[km_atual] & CP)) {
+                    queue_put(&checkpoints[indice_checkpoint], cicl);
+                    indice_checkpoint++;
+                }
                 if (km_atual + 1 == d) {
                     queue_remove(&estrada[km_atual], cicl);
                     cicl->posicao_estrada = d;
