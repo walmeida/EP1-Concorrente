@@ -189,20 +189,42 @@ void inicializa_vel(ciclista *c, char modo_vel) {
     }
 }
 
+void imprime_ciclista(ciclista *cicl) {
+    printf("ID: %5d\n", cicl->id);
+    printf("Velocidade no Plano:   %2d\n", cicl->vel_plano);
+    printf("Velocidade na Subida:  %2d\n", cicl->vel_sub);
+    printf("Velocidade na Descida: %2d\n\n", cicl->vel_desc);
+}
+
 int cria_ciclistas(int m, char modo_vel, int * numciclistas) {
     int i;
     ciclista * cicl;
     *numciclistas = 0;
+    queue ciclistas;
+    queue_init(&ciclistas);
+    void *j;
+
+    printf("LISTA DE CICLISTAS\n\n");
     for (i = 0; i < m; ++i) {
         cicl = (ciclista *) malloc (sizeof (*cicl));
         cicl->id = i;
         cicl->pontos_plano = cicl->pontos_montanha = 0;
         cicl->posicao_estrada = -0.0000001;
         inicializa_vel(cicl, modo_vel);
+        queue_put(&ciclistas, cicl);
+        imprime_ciclista(cicl);
+    }
+
+    j = queue_get_iterator(&ciclistas);
+    while(j) {
+        cicl = (ciclista *) queue_get_iterator_data(j);
         if (pthread_create(&(cicl->tid), NULL, (void *) thread_ciclista, (void *) cicl))
             return 1;
         printf("created thread %d\n",cicl->id);
         (*numciclistas)++;
+        j = queue_iterator_next(j);
     }
+
+    /* TODO: Destruir a lista de ciclista */
     return 0;
 }
