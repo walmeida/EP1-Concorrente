@@ -5,6 +5,9 @@
 #include "terreno.h"
 
 extern int tempo;
+extern int tempo_numthreads;
+extern pthread_mutex_t tempo_mutex;
+extern pthread_cond_t tempo_cond;
 extern int d;
 extern int n;
 extern Terreno *terreno;

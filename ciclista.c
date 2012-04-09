@@ -6,6 +6,7 @@
 
 extern cleanup_queue cq;
 extern queue *estrada;
+extern int numthreads;
 
 /* Devolve a nova posição do ciclista após um minuto.
  * Não verifica se é possível chegar nesta posição,
@@ -51,7 +52,6 @@ static double calcula_proxima_posicao(ciclista * cicl) {
     }
     if (posicao_atual - cicl->posicao_estrada < 0.000001)
         posicao_atual += 0.000001;
-    printf("posicao retornada: %lf\n", posicao_atual);
     return posicao_atual;
 }
 
@@ -61,13 +61,12 @@ void *thread_ciclista(void *arg) {
     while (cicl->posicao_estrada < d) {
         double prox_posicao = calcula_proxima_posicao (cicl);
         int km_atual = (int) cicl->posicao_estrada;
-        /* seção crítica */
+        /* seção crítica da estrada */
         pthread_mutex_lock(&estrada_mutex);
         do {
             if (km_atual + 1 > prox_posicao) {
                 /* TODO Verificar checkpoints (???) */
                 cicl->posicao_estrada = prox_posicao;
-                printf("nao andou para prox km\n");
                 break;
             } else {
                 /* TODO Verificar checkpoints */
@@ -77,7 +76,6 @@ void *thread_ciclista(void *arg) {
                 }
                 if (queue_size(&estrada[km_atual+1]) >= n) {
                     cicl->posicao_estrada = km_atual + 0.9999999;
-                    printf("empacou n = %d, queue_size = %d\n", n, queue_size(&estrada[km_atual+1]));
                     break;
                 } else {
                     cicl->posicao_estrada = prox_posicao;
@@ -85,13 +83,23 @@ void *thread_ciclista(void *arg) {
                         queue_remove(&estrada[km_atual++], cicl);
                     if (km_atual < d)
                         queue_put(&estrada[km_atual], cicl);
-                    printf("andou para km %d\n", km_atual);
                 }
             }
         } while (prox_posicao > cicl->posicao_estrada);
         pthread_mutex_unlock(&estrada_mutex);
-        /* fim seção crítica */
+        /* fim seção crítica estrada */
+        /* seção crítica do tempo */
         /* TODO simular tempo */
+        pthread_mutex_lock(&tempo_mutex);
+        tempo_numthreads++;
+        if (tempo_numthreads == numthreads) {
+            tempo_numthreads = 0;
+            pthread_cond_broadcast(&tempo_cond);
+        } else {
+            pthread_cond_wait(&tempo_cond, &tempo_mutex);
+        }
+        pthread_mutex_unlock(&tempo_mutex);
+        /* fim seção crítica do tempo */
     }
     printf("Thread %d finished the simulation...\n", cicl->id);
     pthread_mutex_lock(&cq.mutex);

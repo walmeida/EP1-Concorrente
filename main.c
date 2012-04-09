@@ -19,8 +19,10 @@ Terreno *terreno;       /* Vetor do comprimento da estrada que indica o "tipo do
 queue * checkpoints;    /* Vetor de filas. Cada elemento da fila é um ciclista que passou pelo CP. */
 int numtrechos;         /* Serve para indicar o tamanho do vetor de checkpoints */
 int tempo;              /* Variável compartilhada do minuto sendo simulado; */
+int tempo_numthreads;   /* Variável compartilhada de threads que simularam aquele instante de tempo. */
 pthread_mutex_t tempo_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t tempo_cond = PTHREAD_COND_INITIALIZER;
+int numthreads = 0;
 
 cleanup_queue cq;
 
@@ -89,7 +91,7 @@ void leitura_entrada(char *nome_arquivo, int *m, int *n, char *modo_vel) {
     terreno[d-1] = terreno[d-1] + CP;
 }
 
-void join_threads(int numthreads) {
+void join_threads() {
   ciclista *curnode;
   printf("joining threads...\n");
   while (numthreads) {
@@ -114,6 +116,12 @@ void join_threads(int numthreads) {
       printf("joined with thread %d\n", curnode->id);
       free(curnode);
       numthreads--;
+      pthread_mutex_lock(&tempo_mutex);
+      if (tempo_numthreads == numthreads) {
+          tempo_numthreads = 0;
+          pthread_cond_broadcast(&tempo_cond);
+      }
+      pthread_mutex_unlock(&tempo_mutex);
   }
 }
 
@@ -137,7 +145,6 @@ int cleanup_queue_destroy() {
 int main(int argc, char* argv[]){
     int m;              /* Número de ciclistas */
     char modo_vel;      /* Modo de Criação da Velocidade:  'A' - Aleatório / 'U' - Uniforme  */
-    int numthreads = 0;
     int i;
     unsigned int iseed = (unsigned int) time(NULL);
     srand (iseed);
@@ -162,15 +169,16 @@ int main(int argc, char* argv[]){
     }
 
     tempo = 0;
+    tempo_numthreads = 0;
     if (cria_ciclistas(m, modo_vel, &numthreads)) {
         /* Erro ao criar alguma thread */
         fprintf(stderr, "Error starting threads!\n");
-        join_threads(numthreads);
+        join_threads();
         cleanup_queue_destroy ();
         return 2;
     }
     printf ("numthreads: %d\n", numthreads);
-    join_threads(numthreads);
+    join_threads();
     /* TODO: imprimir relatorio; */
     cleanup_queue_destroy ();
         
