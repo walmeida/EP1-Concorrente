@@ -24,7 +24,22 @@ pthread_cond_t tempo_cond = PTHREAD_COND_INITIALIZER;
 int numthreads;
 queue listadechegada;  /* Lista de chegada xD */
 
+/* Struct para ordenar ciclistas por pontuaco */
+typedef struct cicl_colocacao {
+    int id;
+    int pontos;
+} cicl_colocacao;
+
 cleanup_queue cq;
+
+int compara_pontos_ciclistas(const void * a, const void * b) {
+    cicl_colocacao *ca = (cicl_colocacao *) a;
+    cicl_colocacao *cb = (cicl_colocacao *) b;
+    if (ca->pontos == cb->pontos) {
+        return (ca->id - cb->id);
+    }
+    return cb->pontos - ca->pontos;
+}
 
 void monta_terreno(int ini, int fim, int checkpoint, Terreno trecho){
     int i;
@@ -104,13 +119,12 @@ void join_threads() {
          list that we need to process.  First, we remove the node from
          the queue.  Then, we call pthread_join() on the tid stored in
          the node.  When pthread_join() returns, we have cleaned up
-         after a thread.  Only then do we free() the node, decrement the
+         after a thread.  Only then do we decrement the
          number of additional threads we need to wait for and repeat the
          entire process, if necessary */
       curnode = (ciclista *) queue_get(&cq.cleanup);
       pthread_mutex_unlock(&cq.mutex);
       pthread_join(curnode->tid, NULL);
-      /*free(curnode);*/
       numthreads--;
       pthread_mutex_lock(&tempo_mutex);
       if (tempo_numthreads == numthreads) {
@@ -140,22 +154,19 @@ int cleanup_queue_destroy() {
     return 0;
 }
 
-void imprime_relatorio(int numcheckpoints){
-    void *j = queue_get_iterator(&listadechegada);
-    int i = 1;
+void imprime_relatorio(int numciclistas, int numcheckpoints){
+    void *j;
+    int i;
     int k;
     ciclista *c;
-    printf("\nLISTA DE CHEGADA!!!!!\n");
-    printf("ID\t Colocacao Chegada\t Pontos Camisa Verde\t Pontos Camisa Vermelha\n");
-    while(j){
-        c =  (ciclista *) queue_get_iterator_data(j);
-        printf("%2d\t %17d\t %19d\t %22d\n", c->id, i, c->pontos_plano, c->pontos_montanha);
-        j = queue_iterator_next(j);
-        i++;
+    cicl_colocacao *colocacao = malloc(numciclistas*sizeof(colocacao));
+    if (!colocacao) {
+        printf("Erro alocando memoria para colocacao final\n");
+        return;
     }
 
-
-    for(k = 0; k < numcheckpoints; ++k) {
+    printf("\nCOLOCACOES NOS CHECKPOINTS\n");
+    for (k = 0; k < numcheckpoints; ++k) {
         printf("\nImprimindo checkpoint %d\n", k);
         j = queue_get_iterator(&checkpoints[k]);
         i = 1;
@@ -165,6 +176,43 @@ void imprime_relatorio(int numcheckpoints){
             j = queue_iterator_next(j);
             i++;
         }
+    }
+
+    printf("\nLISTA DE CHEGADA\n");
+    printf("ID\t Colocacao\n");
+    i = 1;
+    j = queue_get_iterator(&listadechegada);
+    while(j){
+        c =  (ciclista *) queue_get_iterator_data(j);
+        printf("%2d\t %9d\n", c->id, i);
+        j = queue_iterator_next(j);
+        colocacao[i-1].id = c->id;
+        colocacao[i-1].pontos = c->pontos_plano;
+        i++;
+    }
+
+    qsort(colocacao, numciclistas, sizeof(*colocacao), compara_pontos_ciclistas);
+    printf("\nLISTA DE PONTOS DA CAMISA VERDE (etapas planas)\n");
+    printf("ID\t Pontos\n");
+    for (i = 0; i < numciclistas; ++i) {
+        printf("%2d\t %6d\n", colocacao[i].id, colocacao[i].pontos);
+    }
+
+    i = 1;
+    j = queue_get_iterator(&listadechegada);
+    while(j){
+        c =  (ciclista *) queue_get_iterator_data(j);
+        j = queue_iterator_next(j);
+        colocacao[i-1].id = c->id;
+        colocacao[i-1].pontos = c->pontos_montanha;
+        i++;
+    }
+
+    qsort(colocacao, numciclistas, sizeof(*colocacao), compara_pontos_ciclistas);
+    printf("\nLISTA DE PONTOS DA CAMISA BRANCA COM BOLAS VERMELHAS (etapas de montanha)\n");
+    printf("ID\t Pontos\n");
+    for (i = 0; i < numciclistas; ++i) {
+        printf("%2d\t %6d\n", colocacao[i].id, colocacao[i].pontos);
     }
 }
 
@@ -212,7 +260,7 @@ int main(int argc, char* argv[]){
     printf ("numthreads: %d\n", numthreads);
     join_threads();
     /* TODO: imprimir relatorio; */
-    imprime_relatorio(numcheckpoints);
+    imprime_relatorio(m, numcheckpoints);
     cleanup_queue_destroy();
     if(pthread_mutex_destroy(&tempo_mutex))
         printf("Erro destruindo tempo_mutex\n");
