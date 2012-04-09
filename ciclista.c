@@ -10,9 +10,9 @@ extern int numthreads;
 extern queue listadechegada;
 extern queue *checkpoints;
 
-/* Devolve a nova posição do ciclista após um minuto.
- * Não verifica se é possível chegar nesta posição,
- * ou seja, não verifica se há espaço para o ciclista.
+/* Devolve a nova posicao do ciclista apos um minuto.
+ * Não verifica se eh possivel chegar nesta posicao,
+ * ou seja, nao verifica se ha espaco para o ciclista.
  */
 static double calcula_proxima_posicao(ciclista * cicl) {
     Terreno terr;
@@ -41,22 +41,18 @@ static double calcula_proxima_posicao(ciclista * cicl) {
                 break;
         }
         tempo_trecho = (60 * dist_ate_prox_terreno) / vel;
-        /*printf("ID: %d - dist_prox: %lf, vel: %d, temp_t: %lf, temp_sim: %lf\n",
-                cicl->id, dist_ate_prox_terreno, vel, tempo_trecho, tempo_simulado);*/
         if (tempo_trecho + tempo_simulado > 1) {
             posicao_atual += (1 - tempo_simulado) * vel / 60;
-            /*printf("ID: %d - terminou em posicao %.8lf\n", cicl->id, posicao_atual);*/
             break;
         }
-        /*printf("ID: %d - posicao_atual: %lf\n", cicl->id, posicao_atual);*/
         posicao_atual = 1 + (int) posicao_atual;
-        /*printf("ID: %d - posicao_atual atualizada: %lf\n", cicl->id, posicao_atual);*/
     }
     if (posicao_atual - cicl->posicao_estrada < 0.000001)
         posicao_atual += 0.000001;
     return posicao_atual;
 }
 
+/* Devolve a pontuacao de um checkpoint de acordo com a colocacao */
 static int pontuacao(int colocacao) {
     int pontos;
     switch(colocacao) {
@@ -85,6 +81,9 @@ static int pontuacao(int colocacao) {
     return pontos;
 }
 
+/* Adiciona no ciclista a pontuacao de um checkpoint em um terreno de tipo "t", 
+ * quando o ciclista "c" passa por ele nesta "colocacao"
+ */
 void adiciona_pontuacao(ciclista *c, Terreno t, int colocacao) {
     switch(t) {
         case PLANOCP:
@@ -96,7 +95,7 @@ void adiciona_pontuacao(ciclista *c, Terreno t, int colocacao) {
     }
 }
 
-/* Função que simula um ciclista */
+/* Funcao que simula um ciclista */
 void *thread_ciclista(void *arg) {
     ciclista *cicl = (ciclista *) arg;
     int indice_checkpoint = 0;
@@ -160,6 +159,7 @@ void *thread_ciclista(void *arg) {
             tempo_numthreads = 0;
             pthread_cond_broadcast(&tempo_cond);
         } else {
+            /* Espera todas as threads simularem este minuto */
             pthread_cond_wait(&tempo_cond, &tempo_mutex);
         }
         pthread_mutex_unlock(&tempo_mutex);
@@ -173,13 +173,17 @@ void *thread_ciclista(void *arg) {
     return NULL;
 }    
 
-/* Sorteia uma velocidade aleatória entre 20 e 80 Km/h */
+/* Sorteia uma velocidade aleatoria entre 20 e 80 Km/h */
 static int sorteia_velocidade() {
    int velocidade;
    velocidade = 20 + (int)( 60.0 * rand() / ( RAND_MAX + 1.0 ) );
    return velocidade;
 }
 
+/* Inicializa as velocidades de um ciclista
+ * Se modo_vel == 'A', cria 3 velocidades aleatorias no intervalo [20,80)
+ * Caso contrario, as 3 velocidades sao 50
+ */
 void inicializa_vel(ciclista *c, char modo_vel) {
     if(modo_vel == 'A'){
         c->vel_plano = sorteia_velocidade();
@@ -191,6 +195,7 @@ void inicializa_vel(ciclista *c, char modo_vel) {
     }
 }
 
+/* Imprime as velocidades de um ciclista */
 void imprime_ciclista(ciclista *cicl) {
     printf("ID: %5d\n", cicl->id);
     printf("Velocidade no Plano:   %2d\n", cicl->vel_plano);
@@ -198,6 +203,7 @@ void imprime_ciclista(ciclista *cicl) {
     printf("Velocidade na Descida: %2d\n\n", cicl->vel_desc);
 }
 
+/* Cria ciclistas (threads) e imprime suas velocidades */
 int cria_ciclistas(int m, char modo_vel, int * numciclistas) {
     int i;
     ciclista * cicl;

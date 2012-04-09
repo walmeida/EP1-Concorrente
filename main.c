@@ -10,28 +10,29 @@
 
 
 queue *estrada;         /* Vetor Compartilhado da Estrada */
-pthread_mutex_t estrada_mutex = PTHREAD_MUTEX_INITIALIZER;
-int d;                  /* Distância em Km */
+pthread_mutex_t estrada_mutex = PTHREAD_MUTEX_INITIALIZER; /* Mutex para evitar acesso simultaneo a estrada e aos checkpoints */
+int d;                  /* Distancia em Km da estrada */
 int n;                  /* Largura da Pista */
 
-Terreno *terreno;       /* Vetor do comprimento da estrada que indica o "tipo do solo" */
+Terreno *terreno;       /* Vetor do comprimento da estrada (em Km) que indica o "tipo do solo" */
 
-queue *checkpoints;    /* Vetor de filas. Cada elemento da fila é um ciclista que passou pelo CP. */
-int tempo;              /* Variável compartilhada do minuto sendo simulado; */
-int tempo_numthreads;   /* Variável compartilhada de threads que simularam aquele instante de tempo. */
-pthread_mutex_t tempo_mutex = PTHREAD_MUTEX_INITIALIZER;
-pthread_cond_t tempo_cond = PTHREAD_COND_INITIALIZER;
-int numthreads;
+queue *checkpoints;     /* Vetor de filas. Cada elemento da fila eh um ciclista que passou pelo CP. */
+int tempo;              /* Variavel compartilhada do minuto sendo simulado; */
+int tempo_numthreads;   /* Variavel compartilhada de threads que simularam aquele instante de tempo. */
+pthread_mutex_t tempo_mutex = PTHREAD_MUTEX_INITIALIZER; /* Mutex para evitar acesso simultaneo as variaveis compartilhadas de tempo */
+pthread_cond_t tempo_cond = PTHREAD_COND_INITIALIZER; /* Condicao para as threads acordarem quando todas tiverem simulado o instante de tempo */
+int numthreads;        /* Numero de threads que foram criadas */
 queue listadechegada;  /* Lista de chegada xD */
 
 /* Struct para ordenar ciclistas por pontuaco */
 typedef struct cicl_colocacao {
-    int id;
-    int pontos;
+    int id;     /* ID do ciclista */
+    int pontos; /* Pontuacao em algum tipo de etapa */
 } cicl_colocacao;
 
-cleanup_queue cq;
+cleanup_queue cq; /* Fila onde as threads finalizadas se adicionam para que se faca o join */
 
+/* Funcao para ser passada ao qsort quando ordenar colocacoes dos ciclistas por pontos */
 int compara_pontos_ciclistas(const void * a, const void * b) {
     cicl_colocacao *ca = (cicl_colocacao *) a;
     cicl_colocacao *cb = (cicl_colocacao *) b;
@@ -41,6 +42,10 @@ int compara_pontos_ciclistas(const void * a, const void * b) {
     return cb->pontos - ca->pontos;
 }
 
+/* Inicializa o terreno referente ao trecho de tipo "trecho", comecando em
+ * "ini" e terminando em "fim". Pode ter um checkpoint na posicao "checkpoint",
+ * ou nao ter checkpoint (checkpoint == -1)
+ */
 void monta_terreno(int ini, int fim, int checkpoint, Terreno trecho){
     int i;
     for(i = ini; i < fim; i++){
@@ -49,10 +54,11 @@ void monta_terreno(int ini, int fim, int checkpoint, Terreno trecho){
     if(checkpoint != -1) terreno[checkpoint] = trecho + CP;
 }
 
+/* Le o arquivo de entrada e inicializa muitas variaveis do programa */
 void leitura_entrada(char *nome_arquivo, int *m, int *n, char *modo_vel,
         int *numcheckpoints) {
-  FILE *arq_entrada;
-  int k;
+    FILE *arq_entrada;
+    int k;
     int aux = 0;
     char trecho;
     
@@ -105,6 +111,7 @@ void leitura_entrada(char *nome_arquivo, int *m, int *n, char *modo_vel,
     fclose(arq_entrada);
 }
 
+/* Faz join da thread "principal" com as threads criadas de ciclistas */
 void join_threads() {
   ciclista *curnode;
   while (numthreads) {
@@ -129,6 +136,9 @@ void join_threads() {
       numthreads--;
       pthread_mutex_lock(&tempo_mutex);
       if (tempo_numthreads == numthreads) {
+          /* Precisamos acordar as threads que estavam esperando um 
+           * numero maior de ciclistas simularem aquele minuto
+           */
           printf("Terminou instante de tempo %d\n", tempo);
           tempo++;
           tempo_numthreads = 0;
@@ -138,6 +148,7 @@ void join_threads() {
   }
 }
 
+/* Inicializa a fila de limpeza das threads */
 int cleanup_queue_init() {
     if (pthread_mutex_init(&(cq.mutex),NULL))
         return 1;
@@ -147,6 +158,7 @@ int cleanup_queue_init() {
     return 0;
 }
 
+/* Destroi a fila de limpeza das threads */
 int cleanup_queue_destroy() {
     if (pthread_mutex_destroy(&(cq.mutex)))
         return 1;
@@ -155,6 +167,7 @@ int cleanup_queue_destroy() {
     return 0;
 }
 
+/* Imprime um relatorio com os checkpoints e as 3 colocacoes finais */
 void imprime_relatorio(int numciclistas, int numcheckpoints){
     void *j;
     int i;
@@ -219,6 +232,7 @@ void imprime_relatorio(int numciclistas, int numcheckpoints){
     free(colocacao);
 }
 
+/* Libera parte da memoria utilizada */
 void libera_memoria(int numcheckpoints) {
     ciclista * cicl;
     int i;
@@ -279,7 +293,6 @@ int main(int argc, char* argv[]){
     }
     numthreads = numciclistas;
     join_threads();
-    /* TODO: imprimir relatorio; */
     imprime_relatorio(m, numcheckpoints);
     libera_memoria(numcheckpoints);
     cleanup_queue_destroy();
