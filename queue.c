@@ -44,6 +44,30 @@ Item *queue_get(queue *root) {
     return d;
 }
 
+void queue_remove(queue *root, Item *data) {
+    if (!root)
+        return;
+    node *mynode = root->head;
+    node *prev_node = NULL;
+    while (mynode != NULL) {
+        if (mynode->data == data) {
+            if (prev_node) {
+                prev_node->next = mynode->next;
+            } else {
+                root->head = mynode->next;
+            }
+            if (root->tail == mynode) {
+                root->tail = prev_node;
+            }
+            free(mynode);
+            break;
+        }
+        prev_node = mynode;
+        mynode = mynode->next;
+    }
+    root->size--;
+}
+
 int queue_size(queue *root) {
     if (root)
         return root->size;

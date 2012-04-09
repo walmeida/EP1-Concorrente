@@ -19,6 +19,7 @@ typedef struct queue {
 void queue_init(queue *root);
 void queue_put(queue *root, Item *data);
 Item *queue_get(queue *root);
+void queue_remove(queue *root, Item *data);
 int queue_size(queue *root);
 
 #endif

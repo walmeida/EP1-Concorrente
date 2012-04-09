@@ -9,7 +9,8 @@
 #include "threads.h"
 
 
-int *estrada;           /* Vetor Compartilhado da Estrada */
+queue *estrada;           /* Vetor Compartilhado da Estrada */
+pthread_mutex_t estrada_mutex = PTHREAD_MUTEX_INITIALIZER;
 int d;                  /* Distância em Km */
 
 Terreno *terreno;       /* Vetor do comprimento da estrada que indica o "tipo do solo" */
@@ -148,8 +149,13 @@ int main(int argc, char* argv[]){
     leitura_entrada(argv[1], &m, &n, &modo_vel);
     /* Criando o vetor de CP */
     checkpoints = malloc(numtrechos*sizeof(*checkpoints));
-    for(i = 0; i < numtrechos; i++) {
+    for (i = 0; i < numtrechos; i++) {
         queue_init(&checkpoints[i]);
+    }
+    /* Criando o vetor de estrada */
+    estrada = malloc(d*sizeof(*estrada));
+    for (i = 0; i < d; ++i) {
+        queue_init(&estrada[i]);
     }
 
     tempo = 0;

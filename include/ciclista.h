@@ -7,6 +7,7 @@
 extern int tempo;
 extern int d;
 extern Terreno *terreno;
+extern pthread_mutex_t estrada_mutex;
 
 typedef struct biker {
     int id;                 /* Identificador do Ciclista */

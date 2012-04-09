@@ -1,12 +1,13 @@
 #include "ciclista.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "queue.h"
 #include "threads.h"
+#include "queue.h"
 
 extern cleanup_queue cq;
+extern queue *estrada;
 
-/* Devolve a nova posição do cilista após um minuto.
+/* Devolve a nova posição do ciclista após um minuto.
  * Não verifica se é possível chegar nesta posição,
  * ou seja, não verifica se há espaço para o ciclista.
  */
@@ -49,13 +50,29 @@ static double calcula_proxima_posicao(ciclista * cicl) {
     return posicao_atual;
 }
 
+/* Função que simula um ciclista */
 void *thread_ciclista(void *arg) {
     ciclista *cicl = (ciclista *) arg;
-    /* TODO: simulacao do ciclista */
     while (cicl->posicao_estrada < d) {
         double prox_posicao = calcula_proxima_posicao (cicl);
+        int km_atual = (int) cicl->posicao_estrada;
         /* seção crítica */
-        cicl->posicao_estrada = prox_posicao;
+        pthread_mutex_lock(&estrada_mutex);
+        do {
+            if (km_atual + 1 > prox_posicao) {
+                /* TODO Verificar checkpoints */
+                cicl->posicao_estrada = prox_posicao;
+                break;
+            } else {
+                /* TODO Verificar se pode andar mais um km */
+                /* TODO Verificar checkpoints */
+                if (km_atual >= 0)
+                    queue_remove(&estrada[km_atual++], cicl);
+                if (km_atual < d)
+                    queue_put(&estrada[km_atual], cicl);
+            }
+        } while (prox_posicao > cicl->posicao_estrada);
+        pthread_mutex_unlock(&estrada_mutex);
         /* fim seção crítica */
     }
     printf("Thread %d finished the simulation...\n", cicl->id);
@@ -67,6 +84,7 @@ void *thread_ciclista(void *arg) {
     return NULL;
 }    
 
+/* Sorteia uma velocidade aleatória entre 20 e 80 Km/h */
 static int sorteia_velocidade() {
    int velocidade;
    velocidade = 20 + (int)( 60.0 * rand() / ( RAND_MAX + 1.0 ) );
