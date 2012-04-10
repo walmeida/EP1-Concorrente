@@ -32,5 +32,77 @@ onde "nomedoarquivo" é o nome correspondente ao arquivo de entrada.
 Os resultados obtidos pelos arquivos de entrada propostos no enunciado
 encontram-se em "relatorio.pdf".
 
-O formato da saída do programa será:  //TEMOS QUE DECIDIR AINDA, NÃO É???
+O formato da saída do programa será:
+**********COMECO**DA**SAIDA**********
+LISTA DE CICLISTAS
 
+ID:     <id do ciclista>
+Velocidade no Plano:   <velocidade 1>
+Velocidade na Subida:  <velocidade 2>
+Velocidade na Descida: <velocidade 3>
+
+[Repetindo linhas anteriores para cada ciclista]
+
+ID: <id do ciclista> - Esta na posicao <posicao do ciclista apos simulacao deste instante>
+[Linha anterior repetindo para cada ciclista que nao tenha terminado a corrida]
+ID: <id do ciclista> - Passando por Checkpoint no Km <kilometro em que se localiza o checkpoint> (<colocacao obtida> lugar)
+[Linha anterior exibida apenas no momento em que um ciclista passa entre os 3 primeiros de um checkpoint]
+Terminou instante de tempo <numero do instante de tempo que terminou de ser simulado, comecando em 0>
+
+[Repetindo linhas anteriores para cada instante de tempo simulado ate o fim da corrida]
+
+COLOCACOES NOS CHECKPOINTS
+
+Imprimindo checkpoint <numero do checkpoint>
+    1 lugar. - ID: <id do ciclista>
+    2 lugar. - ID: <id do ciclista>
+    3 lugar. - ID: <id do ciclista>
+    4 lugar. - ID: <id do ciclista>
+    [Repetindo linha anterior para cada ciclista]
+
+[Repetindo linhas anteriores para cada checkpoint]
+
+LISTA DE CHEGADA
+ID	 Colocacao
+<id> <posicao>
+[Repetindo linha anterior para cada ciclista, em ordem de chegada]
+
+LISTA DE PONTOS DA CAMISA VERDE (etapas planas)
+ID	 Pontos
+<id> <pontos>
+[Repetindo linha anterior para cada ciclista, da maior para a menor pontuacao,
+ e em ordem crescente de id em caso de empate]
+
+LISTA DE PONTOS DA CAMISA BRANCA COM BOLAS VERMELHAS (etapas de montanha)
+ID	 Pontos
+<id> <pontos>
+[Repetindo linha anterior para cada ciclista, da maior para a menor pontuacao,
+ e em ordem crescente de id em caso de empate]
+************FIM**DA**SAIDA************
+
+
+    Resumo do funcionamento do programa
+
+    Cada thread simula um minuto por vez. Quando todas as threads terminam a
+simulacao de um minuto, a ultima a realizar a simulacao acorda todas as outras
+para que simulem o próximo minuto.
+    Ao terminar a simulacao da corrida, a thread se adiciona em uma fila de 
+limpeza, onde a thread "principal" espera alguém ser adicionado para fazer o
+join das threads.
+    Após a simulacao de todas as threads, a thread "principal" imprime os 
+relatorios finais e libera a memória.
+    Existe um mutex para evitar o acesso simultaneo nas variáveis de estrada
+e de checkpoints. As threads, após calcularem sua próxima posição (máxima), 
+vão andando de kilometro em kilometro até chegar na sua próxima posicao ou
+encontrar uma parte da pista lotada.
+    Também existe um mutex e uma variável de condição para evitar o acesso
+simultaneo as variaveis de tempo. Quando uma thread termina a simulacao de
+um minuto, ela incrementa um contador. Se o contador for igual ao numero de
+threads, ela ja acorda todas as outras threads para que simulem o proximo
+minuto, alem de arrumar as variaveis de tempo para a simulacao deste proximo
+instante. Se o contador for menor do que o numero de threads, ela dorme e
+espera ser acordada quando todas as threads tiverem feito suas simulacoes.
+Se uma thread termina, a thread principal tambem verifica se todas precisam
+ser acordadas, pois elas podem estar esperando um certo numero de threads
+terminarem sua simulacao sendo que na verdade existe uma thread a menos, pois
+ela acabou de terminar sua execucao.
